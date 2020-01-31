@@ -1,6 +1,4 @@
 NAME = ft_ssl
-CC = gcc
-CFLAGS = -Wall -Wextra -Werror
 
 SRCDIR   = ./src/
 OBJDIR   = ./obj/
@@ -10,11 +8,18 @@ SRC = $(addprefix $(SRCDIR), ft_ssl_md5.c)
 OBJ = $(SRC:$(SRCDIR)%.c=$(OBJDIR)%.o)
 HEADERS = $(wildcard $(INCDIR)*.h)
 
+CC = gcc
+LIBFT	 = $(addprefix $(LIBFTDIR), libft.a)
+CFLAGS   = -Wall -Wextra -Werror
+LDFLAGS	 = -L$(LIBFTDIR) -lft
+
+.PHONY: all clean fclean re
+
 all: $(NAME)
 
-$(NAME): $(OBJ)
+$(NAME): $(OBJ) $(LIBFT)
 	$(info Linking objects)
-	@$(CC) $(OBJ) -o $(NAME)
+	@$(CC) $(OBJ) $(LDFLAGS) -o $(NAME)
 	$(info Done.)
 
 $(OBJDIR)%.o: $(SRCDIR)%.c $(HEADERS)
