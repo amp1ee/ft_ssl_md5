@@ -6,4 +6,22 @@
 # include <fcntl.h>
 # include "libft.h"
 
+typedef enum		e_hashtypes
+{
+	MD5 = 32,
+	SHA256 = 64
+}					t_hashtypes;
+
+//typedef char		*(*t_hashfunc)(char *);
+
+char				*hash_md5(char *input);
+char				*hash_sha256(char *input);
+
+typedef struct		s_hashfuncs
+{
+	char			*name;
+	t_hashtypes		type;
+	char			*(*hashfunc)(char *input);
+}					t_hashfuncs;
+
 #endif
