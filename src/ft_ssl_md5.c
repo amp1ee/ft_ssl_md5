@@ -6,42 +6,43 @@ void				print_usage(void)
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
 }
 
+char				*append_padding(char *input)
+{
+	size_t			input_len;
+	size_t			padded_len;
+	char			*padded;
+
+	input_len = ft_strlen(input);
+	padded_len = input_len;
+	while ((padded_len % 512) != 0 || (input_len >= 448 && padded_len <= 512))
+		padded_len++;
+	padded_len -= 64;
+	printf("%zu\n", padded_len);
+	if (!(padded = ft_memalloc(padded_len)))
+		return (NULL);
+	ft_strncpy(padded, input, input_len);
+	padded[input_len++] = '1';
+	while (input_len < padded_len - 1)
+		padded[input_len++] = '0';
+	return (padded);
+}
+
 char				*hash_md5(char *input)
 {
-	char			*outbuf;
-	char			*cmdbuf;
-	char			*cmd = "md5sum - ";
-	FILE			*hash;
+//	char			*outbuf;
+//	char			md5bufs[64][4];
 
-	if (!(outbuf = ft_memalloc(MD5 + 1)))
-		return (NULL);
-	if (!(cmdbuf = ft_memalloc(ft_strlen(input) + ft_strlen(cmd) + 
-			ft_strlen("echo \'\' | "))))
-		return (NULL);
-	sprintf(cmdbuf, "echo \'%s\' | %s", input, cmd);
-	hash = popen(cmdbuf, "r");
-	if (fgets(outbuf, MD5 + 1, hash))
-		return (outbuf);
-	return (NULL);
+	input = append_padding(input);
+	return (input);
+	//input = add_64bit_rep(input);
+	//initialize_buffers(&md5bufs);
+//outbuf = process_blocks(input, md5bufs);
+//	return (outbuf);
 }
 
 char				*hash_sha256(char *input)
 {
-	char			*outbuf;
-	char			*cmdbuf;
-	char			*cmd = "sha256sum - ";
-	FILE			*hash;
-
-	if (!(outbuf = ft_memalloc(SHA256 + 1)))
-		return (NULL);
-	if (!(cmdbuf = ft_memalloc(ft_strlen(input) + ft_strlen(cmd) + 
-			ft_strlen("echo \'\' | "))))
-		return (NULL);
-	sprintf(cmdbuf, "echo \'%s\' | %s", input, cmd);
-	hash = popen(cmdbuf, "r");
-	if (fgets(outbuf, SHA256 + 1, hash))
-		return (outbuf);
-	return (NULL);
+	return (input);
 }
 
 int					main(int argc, char **argv)
@@ -51,7 +52,7 @@ int					main(int argc, char **argv)
 		{"sha256",	SHA256,	hash_sha256	}
 	};
 
-	if (argc < 2)
+	if (argc < 3)
 	{
 		print_usage();
 		return (0);
@@ -61,6 +62,9 @@ int					main(int argc, char **argv)
 		i++;
 	if (i >= 2)
 		return (1);
-	ft_putendl(hashfuncs[i].hashfunc(argv[2]));
+	ft_putendl(argv[2]);
+	char *res = hashfuncs[i].hashfunc(argv[2]);
+	ft_putendl(res);
+	//ft_strdel(&res);
 	return (0);
 }

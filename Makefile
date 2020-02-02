@@ -11,6 +11,9 @@ HEADERS = $(wildcard $(INCDIR)*.h)
 CC = gcc
 LIBFT	 = $(addprefix $(LIBFTDIR), libft.a)
 CFLAGS   = -Wall -Wextra -Werror
+ifdef DEBUG
+	CFLAGS += -g
+endif
 LDFLAGS	 = -L$(LIBFTDIR) -lft
 
 .PHONY: all clean fclean re

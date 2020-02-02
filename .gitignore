@@ -1,0 +1,4 @@
+*.o
+*.a
+obj/
+ft_ssl
