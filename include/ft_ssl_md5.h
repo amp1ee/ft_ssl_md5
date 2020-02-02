@@ -6,6 +6,14 @@
 # include <fcntl.h>
 # include "libft.h"
 
+typedef enum		e_options
+{
+	PRINT_STDINOUT = 1,
+	QUIET_MODE = 2,
+	REVERSE_FMT = 4,
+	GIVEN_STRING = 8
+}					t_options;
+
 typedef enum		e_hashtypes
 {
 	MD5 = 32,

@@ -51,6 +51,9 @@ int					main(int argc, char **argv)
 		{"md5",		MD5,	hash_md5	},
 		{"sha256",	SHA256,	hash_sha256	}
 	};
+	const char			*opts = "pqrs:";
+	int					opt;
+	int					flags;
 
 	if (argc < 3)
 	{
@@ -62,9 +65,19 @@ int					main(int argc, char **argv)
 		i++;
 	if (i >= 2)
 		return (1);
-	ft_putendl(argv[2]);
-	char *res = hashfuncs[i].hashfunc(argv[2]);
-	ft_putendl(res);
-	//ft_strdel(&res);
+	flags = 0;
+	while ((opt = getopt(argc - 1, &argv[1], opts)) != -1)
+	{
+		if (opt == 'p')
+			flags |= PRINT_STDINOUT;
+		else if (opt == 'q')
+			flags |= QUIET_MODE;
+		else if (opt == 'r')
+			flags |= REVERSE_FMT;
+		else if (opt == 's')
+			flags |= GIVEN_STRING;
+		else
+			ft_putendl("given a wrong opt");
+	}
 	return (0);
 }
