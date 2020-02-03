@@ -6,6 +6,11 @@ void				print_usage(void)
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
 }
 
+char				*hash_sha256(char *input)
+{
+	return (input);
+}
+
 char				*append_padding(char *input)
 {
 	size_t			input_len;
@@ -14,16 +19,14 @@ char				*append_padding(char *input)
 
 	input_len = ft_strlen(input);
 	padded_len = input_len;
-	while ((padded_len % 512) != 0 || (input_len >= 448 && padded_len <= 512))
-		padded_len++;
-	padded_len -= 64;
-	printf("%zu\n", padded_len);
+	while (((++padded_len + 64) % 512) != 0)
 	if (!(padded = ft_memalloc(padded_len)))
 		return (NULL);
 	ft_strncpy(padded, input, input_len);
-	padded[input_len++] = '1';
-	while (input_len < padded_len - 1)
-		padded[input_len++] = '0';
+	if (++input_len <= padded_len)
+		padded[input_len - 1] = '1';
+	while (++input_len <= padded_len)
+		padded[input_len - 1] = '0';
 	return (padded);
 }
 
@@ -40,11 +43,6 @@ char				*hash_md5(char *input)
 //	return (outbuf);
 }
 
-char				*hash_sha256(char *input)
-{
-	return (input);
-}
-
 int					main(int argc, char **argv)
 {
 	const t_hashfuncs	hashfuncs[] = {
@@ -54,6 +52,8 @@ int					main(int argc, char **argv)
 	const char			*opts = "pqrs:";
 	int					opt;
 	int					flags;
+	char				*msg = NULL;
+	int					optind;
 
 	if (argc < 3)
 	{
@@ -66,7 +66,7 @@ int					main(int argc, char **argv)
 	if (i >= 2)
 		return (1);
 	flags = 0;
-	while ((opt = getopt(argc - 1, &argv[1], opts)) != -1)
+	while ((opt = ft_getopt(argc - 1, &argv[1], opts, &optind)) != -1)
 	{
 		if (opt == 'p')
 			flags |= PRINT_STDINOUT;
@@ -75,9 +75,19 @@ int					main(int argc, char **argv)
 		else if (opt == 'r')
 			flags |= REVERSE_FMT;
 		else if (opt == 's')
+		{
 			flags |= GIVEN_STRING;
+			msg = argv[optind];
+		}
 		else
-			ft_putendl("given a wrong opt");
+			print_usage();
+	}
+	char	*digested;
+	if (flags & GIVEN_STRING && msg)
+	{
+		digested = hashfuncs[i].hashfunc(msg);
+		ft_putstr(digested);
+		ft_strdel(&digested);
 	}
 	return (0);
 }

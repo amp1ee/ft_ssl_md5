@@ -12,7 +12,7 @@ CC = gcc
 LIBFT	 = $(addprefix $(LIBFTDIR), libft.a)
 CFLAGS   = -Wall -Wextra -Werror
 ifdef DEBUG
-	CFLAGS += -g
+	CFLAGS += -g -DDEBUG=1
 endif
 LDFLAGS	 = -L$(LIBFTDIR) -lft
 
