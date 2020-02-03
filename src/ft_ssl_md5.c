@@ -1,6 +1,8 @@
 #include "ft_ssl_md5.h"
 #include <stdio.h>
 
+# define MD5_ALIGN(x)	((((x + 64) + 511) & ~511) - 64)
+
 void				print_usage(void)
 {
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
@@ -19,7 +21,7 @@ char				*append_padding(char *input)
 
 	input_len = ft_strlen(input);
 	padded_len = input_len;
-	while (((++padded_len + 64) % 512) != 0)
+	padded_len = MD5_ALIGN(input_len);
 	if (!(padded = ft_memalloc(padded_len)))
 		return (NULL);
 	ft_strncpy(padded, input, input_len);
