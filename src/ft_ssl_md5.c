@@ -1,8 +1,6 @@
 #include "ft_ssl_md5.h"
 #include <stdio.h>
 
-# define MD5_ALIGN(x)	((((x + 64) + 511) & ~511) - 64)
-
 void				print_usage(void)
 {
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
@@ -13,16 +11,13 @@ char				*hash_sha256(char *input)
 	return (input);
 }
 
-char				*append_padding(char *input)
+char				*append_padding(char *input, size_t input_len)
 {
-	size_t			input_len;
-	size_t			padded_len;
+	const size_t	padded_len = MD5_ALIGN(input_len);
 	char			*padded;
 
-	input_len = ft_strlen(input);
-	padded_len = input_len;
-	padded_len = MD5_ALIGN(input_len);
-	if (!(padded = ft_memalloc(padded_len)))
+	/* "+ 64" To add 64bit length repres. later */
+	if (!(padded = ft_memalloc(padded_len + 64)))
 		return (NULL);
 	ft_strncpy(padded, input, input_len);
 	if (++input_len <= padded_len)
@@ -32,17 +27,32 @@ char				*append_padding(char *input)
 	return (padded);
 }
 
+char				*add_64bit_rep(char *input, size_t input_len)
+{
+	const size_t	padded_len = MD5_ALIGN(input_len);
+	size_t			pos;
+	size_t			i;
+
+	i = 0;
+	pos = padded_len;
+	while (i < 64)
+		input[pos++] = !!(input_len & (1LL << i++)) + '0';
+	return (input);
+}
+
 char				*hash_md5(char *input)
 {
 //	char			*outbuf;
 //	char			md5bufs[64][4];
+	size_t			input_len;
 
-	input = append_padding(input);
-	return (input);
-	//input = add_64bit_rep(input);
+	input_len = ft_strlen(input);
+	input = append_padding(input, input_len);
+	input = add_64bit_rep(input, input_len);
+
 	//initialize_buffers(&md5bufs);
 //outbuf = process_blocks(input, md5bufs);
-//	return (outbuf);
+	return (input);
 }
 
 int					main(int argc, char **argv)
