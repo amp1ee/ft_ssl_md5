@@ -22,14 +22,14 @@ typedef enum		e_hashtypes
 	SHA256 = 64
 }					t_hashtypes;
 
-char				*hash_md5(char *input);
-char				*hash_sha256(char *input);
+char				*hash_md5(char *input, size_t input_len);
+char				*hash_sha256(char *input, size_t input_len);
 
 typedef struct		s_hashfuncs
 {
 	char			*name;
 	t_hashtypes		type;
-	char			*(*hashfunc)(char *input);
+	char			*(*hashfunc)(char *input, size_t input_len);
 }					t_hashfuncs;
 
 #endif

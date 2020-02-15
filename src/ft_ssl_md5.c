@@ -9,8 +9,9 @@ void				print_usage(void)
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
 }
 
-char				*hash_sha256(char *input)
+char				*hash_sha256(char *input, size_t input_len)
 {
+	(void)input_len;
 	return (input);
 }
 
@@ -47,13 +48,11 @@ char				*add_64bit_rep(char *input, size_t input_len)
 	return (input);
 }
 
-char				*hash_md5(char *input)
+char				*hash_md5(char *input, size_t input_len)
 {
 //	char			*outbuf;
 //	char			md5bufs[64][4];
-	size_t			input_len;
 
-	input_len = ft_strlen(input);
 	input = append_padding(input, input_len);
 	input = add_64bit_rep(input, input_len);
 
@@ -104,7 +103,7 @@ int					main(int argc, char **argv)
 	char	*digested;
 	if (flags & GIVEN_STRING && msg)
 	{
-		digested = hashfuncs[i].hashfunc(msg);
+		digested = hashfuncs[i].hashfunc(msg, ft_strlen(msg));
 		fwrite(digested, 1, 120, stdout);
 		ft_strdel(&digested);
 	}
