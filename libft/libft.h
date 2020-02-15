@@ -108,5 +108,7 @@ int					get_next_line(int fd, char **line);
 int					ft_atoi_base(char *num, int base);
 void				ft_lstreverse(t_list **head);
 int					ft_strpos(char *line, char c);
+int					ft_getopt(int argc, char **argv, const char *optstr,
+						int *ind);
 
 #endif

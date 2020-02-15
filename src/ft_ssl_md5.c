@@ -1,5 +1,8 @@
 #include "ft_ssl_md5.h"
 #include <stdio.h>
+#include <errno.h>
+
+#define TMPFILE "/tmp/fprintf.tmp"
 
 void				print_usage(void)
 {
@@ -16,14 +19,13 @@ char				*append_padding(char *input, size_t input_len)
 	const size_t	padded_len = MD5_ALIGN(input_len);
 	char			*padded;
 
-	/* "+ 64" To add 64bit length repres. later */
-	if (!(padded = ft_memalloc(padded_len + 64)))
+	if (!(padded = ft_memalloc(padded_len)))
 		return (NULL);
 	ft_strncpy(padded, input, input_len);
-	if (++input_len <= padded_len)
-		padded[input_len - 1] = '1';
-	while (++input_len <= padded_len)
-		padded[input_len - 1] = '0';
+	if (++input_len <= (padded_len - 8))
+		padded[input_len - 1] = 0x80;
+	while (++input_len <= (padded_len - 8))
+		padded[input_len - 1] = 0x0;
 	return (padded);
 }
 
@@ -31,12 +33,17 @@ char				*add_64bit_rep(char *input, size_t input_len)
 {
 	const size_t	padded_len = MD5_ALIGN(input_len);
 	size_t			pos;
-	size_t			i;
 
-	i = 0;
-	pos = padded_len;
-	while (i < 64)
-		input[pos++] = !!(input_len & (1LL << i++)) + '0';
+	fprintf(fopen(TMPFILE, "a"), "%zu\n", padded_len);
+
+	pos = padded_len - 8;
+	while (pos < padded_len) {
+		input[pos++] = (unsigned char)(input_len & 0xff);
+		input[pos++] = (unsigned char)((input_len >> 8) & 0xff);
+		input[pos++] = (unsigned char)((input_len >> 16) & 0xff);
+		input[pos++] = (unsigned char)((input_len >> 24) & 0xff);
+		input_len >>= 32;
+	}
 	return (input);
 }
 
@@ -98,7 +105,7 @@ int					main(int argc, char **argv)
 	if (flags & GIVEN_STRING && msg)
 	{
 		digested = hashfuncs[i].hashfunc(msg);
-		ft_putstr(digested);
+		fwrite(digested, 1, 120, stdout);
 		ft_strdel(&digested);
 	}
 	return (0);
