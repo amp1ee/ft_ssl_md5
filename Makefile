@@ -41,6 +41,6 @@ clean:
 fclean: clean
 	$(info Deleting $(NAME))
 	@rm -rf $(NAME)
-	@make -sC $(LIBFTDIR) fclean
+#	@make -sC $(LIBFTDIR) fclean
 
 re: fclean all
