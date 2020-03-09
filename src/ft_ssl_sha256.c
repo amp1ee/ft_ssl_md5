@@ -80,31 +80,31 @@ static void		compress_loop(uint32_t *h, uint32_t *sched, int j)
 	h[0] = tmp[4] + tmp[5];
 }
 
-__uint128_t		rev_bytes(__uint128_t to_rev, int size)
+uint32_t			swap_uint32(uint32_t val)
 {
-	int				i;
-	__uint128_t		tmp;
-
-	i = -1;
-	tmp = 0;
-	while (++i < size)
-		((unsigned char *)&tmp)[size - 1 - i] = ((unsigned char *)&to_rev)[i];
-	return (tmp);
+	val = ((val << 8) & 0xFF00FF00)
+		| ((val >> 8) & 0xFF00FF);
+	return (val << 16) | (val >> 16);
 }
 
-void			reverse_n_words(uint64_t *to_rev, int n, int bytes)
+// TODO: what's going on?
+uint64_t			swap_uint64(uint64_t val)
+{
+	val = ((val << 8) & 0xFF00FF00FF00FF00ULL)
+		| ((val >> 8) & 0x00FF00FF00FF00FFULL);
+	val = ((val << 16) & 0xFFFF0000FFFF0000ULL)
+		| ((val >> 16) & 0x0000FFFF0000FFFFULL);
+	return (val << 32) | (val >> 32);
+}
+
+void			swap_words(uint64_t *words, int wsize, int n)
 {
 	int i;
 
 	i = -1;
 	while (++i < n)
-	{
-		if (bytes == sizeof(uint64_t))
-			to_rev[i] = rev_bytes(to_rev[i], bytes);
-		else
-			((uint32_t *)to_rev)[i] =
-			rev_bytes(((uint32_t *)to_rev)[i], bytes);
-	}
+		(wsize == sizeof(uint64_t)) ? words[i] = swap_uint64(words[i])
+		: (((uint32_t *)words)[i] = swap_uint32(((uint32_t *)words)[i]));
 }
 
 static void			process_blocks(char *padded, size_t input_len,
@@ -123,7 +123,7 @@ static void			process_blocks(char *padded, size_t input_len,
 		while (++j < 8)
 			h[j] = ctx->state[j];
 		ft_memcpy((void *)chunk, (void *)&padded[i], 64);
-		reverse_n_words((uint64_t *)chunk, 16, sizeof(uint32_t));
+		swap_words((uint64_t *)chunk, sizeof(uint32_t), 16);
 		extend_words(chunk);
 		j = -1;
 		while (++j < 64)
@@ -135,41 +135,20 @@ static void			process_blocks(char *padded, size_t input_len,
 	}
 }
 
-uint32_t swap_uint32( uint32_t val )
-{
-	val = ((val << 8) & 0xFF00FF00 ) | ((val >> 8) & 0xFF00FF ); 
-	return (val << 16) | (val >> 16);
-}
-
-// TODO: what's going on?
-uint64_t swap_uint64( uint64_t val )
-{
-	val = ((val << 8) & 0xFF00FF00FF00FF00ULL ) | ((val >> 8) & 0x00FF00FF00FF00FFULL );
-	val = ((val << 16) & 0xFFFF0000FFFF0000ULL ) | ((val >> 16) & 0x0000FFFF0000FFFFULL );
-	return (val << 32) | (val >> 32);
-}
-
 char				*hash_sha256(char *input, uint64_t input_len)
 {
 	char			*digested;
+	char			*tmp;
 	t_sha2ctx		ctx;
 	size_t			j;
 
 	init_sha2_context(&ctx);
-
-	FILE			*tmpfile = fopen(TMPFILE, "a");
-	fprintf((tmpfile ), "%zu <-- %zu\n", LEN_ALIGN(input_len), input_len);
-	fclose(tmpfile);
-
 	input = append_padding(input, input_len);
-	uint64_t swapped_len = swap_uint64(input_len);
-	input = add_64bit_rep(input, swapped_len, LEN_ALIGN(input_len));
-
+	input = add_64bit_rep(input, swap_uint64(input_len << 3),
+										LEN_ALIGN(input_len));
 	process_blocks(input, input_len, &ctx);
 	ft_strdel(&input);
-
 	j = 0;
-	char	*tmp;
 	digested = ft_strnew(64);
 	while (j < 8)
 	{

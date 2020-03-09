@@ -51,8 +51,7 @@ char				*add_64bit_rep(char *input, uint64_t input_len,
 												uint64_t padded_len)
 {
 	uint64_t		pos;
-	
-	input_len <<= 3;
+
 	pos = padded_len - 8;
 	while (pos < padded_len) {
 		input[pos++] = (char)(input_len & 0xff);
@@ -161,7 +160,7 @@ char		*hash_md5(char *input, uint64_t input_len)
 
 	init_md5_context(&ctx);
 	input = append_padding(input, input_len);
-	input = add_64bit_rep(input, input_len, LEN_ALIGN(input_len));
+	input = add_64bit_rep(input, input_len << 3, LEN_ALIGN(input_len));
 
 	process_blocks(input, input_len, &ctx);
 	ft_strdel(&input);
