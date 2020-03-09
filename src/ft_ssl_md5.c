@@ -1,8 +1,5 @@
 #include "ft_ssl_md5.h"
 #include <stdio.h>
-#include <errno.h>
-
-#define TMPFILE "/tmp/fprintf.tmp"
 
 unsigned char	s[64] = {
 	7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
@@ -11,7 +8,7 @@ unsigned char	s[64] = {
 	6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
 };
 
-uint32_t		K[64] = {
+uint32_t		MD5_K[64] = {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 	0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 	0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -30,21 +27,14 @@ uint32_t		K[64] = {
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 
 };
 
-
 void				print_usage(void)
 {
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
 }
 
-char		*hash_sha256(char *input, uint64_t input_len)
+char				*append_padding(char *input, uint64_t input_len)
 {
-	(void)input_len;
-	return (input);
-}
-
-char				*append_padding(char *input, size_t input_len)
-{
-	const size_t	padded_len = MD5_ALIGN(input_len);
+	const uint64_t	padded_len = LEN_ALIGN(input_len);
 	char			*padded;
 
 	if (!(padded = ft_memalloc(padded_len)))
@@ -57,13 +47,11 @@ char				*append_padding(char *input, size_t input_len)
 	return (padded);
 }
 
-char				*add_64bit_rep(char *input, uint64_t input_len)
+char				*add_64bit_rep(char *input, uint64_t input_len,
+												uint64_t padded_len)
 {
-	const size_t	padded_len = MD5_ALIGN(input_len);
-	size_t			pos;
-
-	fprintf(fopen(TMPFILE, "a"), "%zu\n", padded_len);
-
+	uint64_t		pos;
+	
 	input_len <<= 3;
 	pos = padded_len - 8;
 	while (pos < padded_len) {
@@ -76,7 +64,7 @@ char				*add_64bit_rep(char *input, uint64_t input_len)
 	return (input);
 }
 
-void				initialize_context(t_md5ctx *ctx)
+void				init_md5_context(t_md5ctx *ctx)
 {
 	const uint32_t	a0 = 0x67452301;
 	const uint32_t	b0 = 0xefcdab89;
@@ -90,10 +78,10 @@ void				initialize_context(t_md5ctx *ctx)
 	ctx->count[1] = 0;
 }
 
-void				process_blocks(char *padded, size_t input_len,
+static void			process_blocks(char *padded, size_t input_len,
 									t_md5ctx *ctx)
 {
-	const size_t	padded_len = MD5_ALIGN(input_len);
+	const size_t	padded_len = LEN_ALIGN(input_len);
 	size_t			i;
 	char			chunk[64];
 	uint32_t		A, B, C, D, j;
@@ -130,7 +118,7 @@ void				process_blocks(char *padded, size_t input_len,
 				F = C ^ (B | ~D);
 				g = (7*j) % 16;
 			}
-			F = F + A + K[j] + ((uint32_t *)chunk)[g];
+			F = F + A + MD5_K[j] + ((uint32_t *)chunk)[g];
 			A = D;
 			D = C;
 			C = B;
@@ -171,9 +159,9 @@ char		*hash_md5(char *input, uint64_t input_len)
 	t_md5ctx		ctx;
 	size_t			j;
 
-	initialize_context(&ctx);
+	init_md5_context(&ctx);
 	input = append_padding(input, input_len);
-	input = add_64bit_rep(input, input_len);
+	input = add_64bit_rep(input, input_len, LEN_ALIGN(input_len));
 
 	process_blocks(input, input_len, &ctx);
 	ft_strdel(&input);
