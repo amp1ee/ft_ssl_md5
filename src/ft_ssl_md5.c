@@ -27,11 +27,6 @@ uint32_t		MD5_K[64] = {
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 
 };
 
-void				print_usage(void)
-{
-	ft_putendl("usage: ft_ssl command [command opts] [command args]");
-}
-
 char				*append_padding(char *input, uint64_t input_len)
 {
 	const uint64_t	padded_len = LEN_ALIGN(input_len);
@@ -63,22 +58,20 @@ char				*add_64bit_rep(char *input, uint64_t input_len,
 	return (input);
 }
 
-void				init_md5_context(t_md5ctx *ctx)
+void				init_md5_context(t_context *ctx)
 {
 	const uint32_t	a0 = 0x67452301;
 	const uint32_t	b0 = 0xefcdab89;
 	const uint32_t	c0 = 0x98badcfe;
 	const uint32_t	d0 = 0x10325476;
-	ctx->state[0] = a0;
-	ctx->state[1] = b0;
-	ctx->state[2] = c0;
-	ctx->state[3] = d0;
-	ctx->count[0] = 0;
-	ctx->count[1] = 0;
+	ctx->md5[0] = a0;
+	ctx->md5[1] = b0;
+	ctx->md5[2] = c0;
+	ctx->md5[3] = d0;
 }
 
 static void			process_blocks(char *padded, size_t input_len,
-									t_md5ctx *ctx)
+									t_context *ctx)
 {
 	const size_t	padded_len = LEN_ALIGN(input_len);
 	size_t			i;
@@ -90,10 +83,10 @@ static void			process_blocks(char *padded, size_t input_len,
 	while (i < padded_len)
 	{
 		ft_memcpy(chunk, &padded[i], 64);
-		A = ctx->state[0];
-		B = ctx->state[1];
-		C = ctx->state[2];
-		D = ctx->state[3];
+		A = ctx->md5[0];
+		B = ctx->md5[1];
+		C = ctx->md5[2];
+		D = ctx->md5[3];
 		j = 0;
 		while (j < 64)
 		{
@@ -124,10 +117,10 @@ static void			process_blocks(char *padded, size_t input_len,
 			B = B + LEFT_ROTATE(F, s[j]);
 			j++;
 		}
-		ctx->state[0] += A;
-		ctx->state[1] += B;
-		ctx->state[2] += C;
-		ctx->state[3] += D;
+		ctx->md5[0] += A;
+		ctx->md5[1] += B;
+		ctx->md5[2] += C;
+		ctx->md5[3] += D;
 		i += 64;
 	}
 }
@@ -155,7 +148,7 @@ char			*bytes_to_ascii(uint64_t bytes, size_t size)
 char		*hash_md5(char *input, uint64_t input_len)
 {
 	char			*digested;
-	t_md5ctx		ctx;
+	t_context		ctx;
 	size_t			j;
 
 	init_md5_context(&ctx);
@@ -170,59 +163,10 @@ char		*hash_md5(char *input, uint64_t input_len)
 	digested = ft_strnew(32);
 	while (j < 4)
 	{
-		tmp = bytes_to_ascii(ctx.state[j], sizeof(uint32_t));
+		tmp = bytes_to_ascii(ctx.md5[j], sizeof(uint32_t));
 		ft_strncpy(digested + (j << 3), tmp, sizeof(uint32_t) << 1);
 		ft_strdel(&tmp);
 		++j;
 	}
 	return (digested);
-}
-
-int					main(int argc, char **argv)
-{
-	const t_hashfuncs	hashfuncs[] = {
-		{"md5",		MD5,	hash_md5	},
-		{"sha256",	SHA256,	hash_sha256	}
-	};
-	const char			*opts = "pqrs:";
-	int					opt;
-	int					flags;
-	char				*msg = NULL;
-	int					optind;
-
-	if (argc < 3)
-	{
-		print_usage();
-		return (0);
-	}
-	int i = 0;
-	while (i < 2 && !ft_strequ(argv[1], hashfuncs[i].name))
-		i++;
-	if (i >= 2)
-		return (1);
-	flags = 0;
-	while ((opt = ft_getopt(argc - 1, &argv[1], opts, &optind)) != -1)
-	{
-		if (opt == 'p')
-			flags |= PRINT_STDINOUT;
-		else if (opt == 'q')
-			flags |= QUIET_MODE;
-		else if (opt == 'r')
-			flags |= REVERSE_FMT;
-		else if (opt == 's')
-		{
-			flags |= GIVEN_STRING;
-			msg = argv[optind];
-		}
-		else
-			print_usage();
-	}
-	char	*digested;
-	if (flags & GIVEN_STRING && msg)
-	{
-		digested = hashfuncs[i].hashfunc(msg, (uint64_t)ft_strlen(msg));
-		printf("%s\n", digested);
-		ft_strdel(&digested);
-	}
-	return (0);
 }

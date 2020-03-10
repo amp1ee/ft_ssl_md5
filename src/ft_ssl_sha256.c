@@ -22,16 +22,16 @@ uint32_t			g_sha2_k[64] = {
 	0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
 };
 
-void				init_sha2_context(t_sha2ctx *ctx)
+void				init_sha2_context(t_context *ctx)
 {
-	ctx->state[0] = 0x6A09E667;
-	ctx->state[1] = 0xBB67AE85;
-	ctx->state[2] = 0x3C6EF372;
-	ctx->state[3] = 0xA54FF53A;
-	ctx->state[4] = 0x510E527F;
-	ctx->state[5] = 0x9B05688C;
-	ctx->state[6] = 0x1F83D9AB;
-	ctx->state[7] = 0x5BE0CD19;
+	ctx->sha2[0] = 0x6A09E667;
+	ctx->sha2[1] = 0xBB67AE85;
+	ctx->sha2[2] = 0x3C6EF372;
+	ctx->sha2[3] = 0xA54FF53A;
+	ctx->sha2[4] = 0x510E527F;
+	ctx->sha2[5] = 0x9B05688C;
+	ctx->sha2[6] = 0x1F83D9AB;
+	ctx->sha2[7] = 0x5BE0CD19;
 }
 
 /*
@@ -108,7 +108,7 @@ void			swap_words(uint64_t *words, int wsize, int n)
 }
 
 static void			process_blocks(char *padded, size_t input_len,
-									t_sha2ctx *ctx)
+									t_context *ctx)
 {
 	const size_t	padded_len = LEN_ALIGN(input_len);
 	size_t			i;
@@ -121,7 +121,7 @@ static void			process_blocks(char *padded, size_t input_len,
 	{
 		j = -1;
 		while (++j < 8)
-			h[j] = ctx->state[j];
+			h[j] = ctx->sha2[j];
 		ft_memcpy((void *)chunk, (void *)&padded[i], 64);
 		swap_words((uint64_t *)chunk, sizeof(uint32_t), 16);
 		extend_words(chunk);
@@ -130,7 +130,7 @@ static void			process_blocks(char *padded, size_t input_len,
 			compress_loop(h, chunk, j);
 		j = -1;
 		while (++j < 8)
-			ctx->state[j] += h[j];
+			ctx->sha2[j] += h[j];
 		i += 64;
 	}
 }
@@ -139,7 +139,7 @@ char				*hash_sha256(char *input, uint64_t input_len)
 {
 	char			*digested;
 	char			*tmp;
-	t_sha2ctx		ctx;
+	t_context		ctx;
 	size_t			j;
 
 	init_sha2_context(&ctx);
@@ -152,7 +152,7 @@ char				*hash_sha256(char *input, uint64_t input_len)
 	digested = ft_strnew(64);
 	while (j < 8)
 	{
-		tmp = bytes_to_ascii(swap_uint32(ctx.state[j]), sizeof(uint32_t));
+		tmp = bytes_to_ascii(swap_uint32(ctx.sha2[j]), sizeof(uint32_t));
 		ft_strncpy(digested + (j << 3), tmp, sizeof(uint32_t) << 1);
 		ft_strdel(&tmp);
 		j++;

@@ -4,8 +4,9 @@ SRCDIR   = ./src/
 OBJDIR   = ./obj/
 INCDIR   = ./include/
 LIBFTDIR = ./libft/
-SRC = $(addprefix $(SRCDIR),	ft_ssl_md5.c \
-								ft_ssl_sha256.c)
+SRC = $(addprefix $(SRCDIR),	main.c			\
+								ft_ssl_md5.c	\
+								ft_ssl_sha256.c	)
 OBJ = $(SRC:$(SRCDIR)%.c=$(OBJDIR)%.o)
 HEADERS = $(wildcard $(INCDIR)*.h)
 
