@@ -29,18 +29,22 @@ void			identify_type(t_global *g)
 	if (i == NUM_ALGOS)
 	{
 		g->algo.type = NO_TYPE;
-		ft_putendl("Invalid command"); // TODO: echo the command
+		ft_putendl("Invalid command");											// TODO: echo the command
 		print_usage();
 	}
 }
 
-void			save_option(t_global *g, t_list **list, int optind)
+void			save_input(t_global *g, int optind, t_argtype atype)
 {
 	t_list		*new;
+	t_input		arg;
 
-	if (!(new = ft_lstnew(g->argv[optind], ft_strlen(g->argv[optind]))))
-		return ;			// TODO: malloc error handling
-	ft_lstadd(list, new);	// TODO: append instead of prepend to list
+	arg.type = atype;
+	arg.str = (optind) ? g->argv[optind] : "";
+	arg.str_len = (optind) ? ft_strlen(g->argv[optind]) : 0;
+	if (!(new = ft_lstnew((void *)&arg, sizeof(t_input))))
+		return ;																// TODO: malloc error handling
+	ft_lstadd(&(g->inputs), new);												// TODO: append instead of prepend to list
 }
 
 void			parse_options(t_global *g)
@@ -50,12 +54,14 @@ void			parse_options(t_global *g)
 	int					optind;
 
 	g->flags = 0;
-	g->str_opts = NULL;
-	g->files = NULL;
+	g->inputs = NULL;
 	while ((opt = ft_getopt(g->argc - 1, &(g->argv)[1], opts, &optind)) != -1)
 	{
 		if (opt == 'p')
+		{
+			save_input(g, 0, P_STDIN);
 			g->flags |= PRINT_STDINOUT;
+		}
 		else if (opt == 'q')
 			g->flags |= QUIET_MODE;
 		else if (opt == 'r')
@@ -63,10 +69,10 @@ void			parse_options(t_global *g)
 		else if (opt == 's')
 		{
 			g->flags |= GIVEN_STRING;
-			save_option(g, &(g->str_opts), optind);
+			save_input(g, optind, S_STRING);
 		}
 		else if (opt == '?')
-			save_option(g, &(g->files), optind);
+			save_input(g, optind, F_FILE);
 		else
 			print_usage();
 	}
@@ -77,15 +83,22 @@ void				proceed_digest(t_global *g)
 	t_algo			algo;
 	char			*digested;
 	t_list			*arg;
+	t_input			*i;
 
 	algo = g->algo;
-	arg = g->str_opts;
+	arg = g->inputs;
 	while (arg != NULL)
 	{
-		algo.init_ctx(&(algo.ctx));
-		digested = algo.hashfunc((char *)(arg->content), (uint64_t)(arg->content_size));
-		printf("%s\n", digested);
-		ft_strdel(&digested);
+		i = (t_input *)(arg->content);
+		if (i->type == P_STDIN)													//TODO: OR == EMPTY
+			digest_stdin(g);
+		else if (i->type == S_STRING)
+		{
+			algo.init_ctx(&(algo.ctx));
+			digested = algo.hashfunc((char *)(i->str), (uint64_t)(i->str_len));
+			printf("%s\n", digested);
+			ft_strdel(&digested);
+		}
 		arg = arg->next;
 	}
 }

@@ -145,9 +145,10 @@ char			*bytes_to_ascii(uint64_t bytes, size_t size)
 	return (ascii);
 }
 
-char		*hash_md5(char *input, uint64_t input_len)
+char				*hash_md5(char *input, uint64_t input_len)
 {
 	char			*digested;
+	char			*tmp;
 	t_context		ctx;
 	size_t			j;
 
@@ -159,7 +160,6 @@ char		*hash_md5(char *input, uint64_t input_len)
 	ft_strdel(&input);
 
 	j = 0;
-	char	*tmp;
 	digested = ft_strnew(32);
 	while (j < 4)
 	{

@@ -22,15 +22,15 @@
 
 #define TMPFILE "/tmp/fprintf.tmp"
 
-typedef enum			e_opt_type
+typedef enum			e_options
 {
 	PRINT_STDINOUT = 1,
 	QUIET_MODE = 2,
 	REVERSE_FMT = 4,
 	GIVEN_STRING = 8
-}						t_opt_type;
+}						t_option;
 
-typedef enum			e_hash_type
+typedef enum			e_hash_types
 {
 	NO_TYPE = 0,
 	MD5,
@@ -67,7 +67,22 @@ static const t_algo			g_algorithms[] = {
 		.digest_len = 64, .chunk_len = 64 }
 };
 
-// TODO: rename
+typedef enum			e_argtypes
+{
+	ERR_TYPE = 0,
+	P_STDIN,
+	S_STRING,
+	F_FILE
+}						t_argtype;
+
+typedef struct			s_input_arg
+{
+	t_argtype			type;
+	char				*str;
+	size_t				str_len;
+}						t_input;
+
+// TODO: rename?
 typedef struct			s_global
 {
 	t_algo				algo;
@@ -75,8 +90,7 @@ typedef struct			s_global
 	int					argc;
 	char				**argv;
 	unsigned			flags;
-	t_list				*str_opts;
-	t_list				*files;
+	t_list				*inputs;
 }						t_global;
 
 # define NUM_ALGOS (sizeof(g_algorithms) / sizeof(t_algo))
