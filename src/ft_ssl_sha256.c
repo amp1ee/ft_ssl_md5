@@ -80,33 +80,7 @@ static void		compress_loop(uint32_t *h, uint32_t *sched, int j)
 	h[0] = tmp[4] + tmp[5];
 }
 
-uint32_t			swap_uint32(uint32_t val)
-{
-	val = ((val << 8) & 0xFF00FF00)
-		| ((val >> 8) & 0xFF00FF);
-	return (val << 16) | (val >> 16);
-}
-
-// TODO: what's going on?
-uint64_t			swap_uint64(uint64_t val)
-{
-	val = ((val << 8) & 0xFF00FF00FF00FF00ULL)
-		| ((val >> 8) & 0x00FF00FF00FF00FFULL);
-	val = ((val << 16) & 0xFFFF0000FFFF0000ULL)
-		| ((val >> 16) & 0x0000FFFF0000FFFFULL);
-	return (val << 32) | (val >> 32);
-}
-
-void			swap_words(uint64_t *words, int wsize, int n)
-{
-	int i;
-
-	i = -1;
-	while (++i < n)
-		(wsize == sizeof(uint64_t)) ? words[i] = swap_uint64(words[i])
-		: (((uint32_t *)words)[i] = swap_uint32(((uint32_t *)words)[i]));
-}
-
+/*
 static void			process_blocks(char *padded, size_t input_len,
 									t_context *ctx)
 {
@@ -134,7 +108,8 @@ static void			process_blocks(char *padded, size_t input_len,
 		i += 64;
 	}
 }
-
+*/
+/*
 char				*hash_sha256(char *input, uint64_t input_len)
 {
 	char			*digested;
@@ -158,4 +133,23 @@ char				*hash_sha256(char *input, uint64_t input_len)
 		j++;
 	}
 	return (digested);
+}
+*/
+
+void				hash_sha256(t_context *ctx, char *chunk)
+{
+	uint32_t		h[8];
+	size_t			j;
+
+	j = -1;
+	while (++j < 8)
+		h[j] = ctx->sha2[j];
+	swap_words((uint64_t *)chunk, sizeof(uint32_t), 16);
+	extend_words((uint32_t *)chunk);
+	j = -1;
+	while (++j < 64)
+		compress_loop(h, (uint32_t *)chunk, j);
+	j = -1;
+	while (++j < 8)
+		ctx->sha2[j] += h[j];
 }

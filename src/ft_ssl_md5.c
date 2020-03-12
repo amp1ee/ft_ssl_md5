@@ -1,14 +1,14 @@
 #include "ft_ssl_md5.h"
 #include <stdio.h>
 
-unsigned char	s[64] = {
+unsigned char	g_s[64] = {
 	7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,  7, 12, 17, 22,
 	5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,  5,  9, 14, 20,
 	4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,  4, 11, 16, 23,
 	6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21,  6, 10, 15, 21
 };
 
-uint32_t		MD5_K[64] = {
+uint32_t		g_md5_k[64] = {
 	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
 	0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 	0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
@@ -27,9 +27,9 @@ uint32_t		MD5_K[64] = {
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 
 };
 
-char				*append_padding(char *input, uint64_t input_len)
+char				*append_padding_md5sha2(char *input, uint64_t input_len)
 {
-	const uint64_t	padded_len = LEN_ALIGN(input_len);
+	const uint64_t	padded_len = LEN_ALIGN(input_len); // TODO: get rid of this
 	char			*padded;
 
 	if (!(padded = ft_memalloc(padded_len)))
@@ -42,18 +42,18 @@ char				*append_padding(char *input, uint64_t input_len)
 	return (padded);
 }
 
-char				*add_64bit_rep(char *input, uint64_t input_len,
-												uint64_t padded_len)
+char				*add_64bit_len_md5sha2(char *input, uint64_t append_len,
+											uint64_t padded_len)
 {
 	uint64_t		pos;
 
 	pos = padded_len - 8;
 	while (pos < padded_len) {
-		input[pos++] = (char)(input_len & 0xff);
-		input[pos++] = (char)((input_len >> 8) & 0xff);
-		input[pos++] = (char)((input_len >> 16) & 0xff);
-		input[pos++] = (char)((input_len >> 24) & 0xff);
-		input_len >>= 32;
+		input[pos++] = (char)(append_len & 0xff);
+		input[pos++] = (char)((append_len >> 8) & 0xff);
+		input[pos++] = (char)((append_len >> 16) & 0xff);
+		input[pos++] = (char)((append_len >> 24) & 0xff);
+		append_len >>= 32;
 	}
 	return (input);
 }
@@ -70,6 +70,7 @@ void				init_md5_context(t_context *ctx)
 	ctx->md5[3] = d0;
 }
 
+/*
 static void			process_blocks(char *padded, size_t input_len,
 									t_context *ctx)
 {
@@ -124,27 +125,9 @@ static void			process_blocks(char *padded, size_t input_len,
 		i += 64;
 	}
 }
+*/
 
-char			*bytes_to_ascii(uint64_t bytes, size_t size)
-{
-	const char	*hexbase = "0123456789abcdef";
-	char		*ascii;
-	size_t		i;
-	size_t		j;
-
-	if (!(ascii = ft_strnew(size << 1)))
-		return (NULL);
-	i = 0;
-	j = 0;
-	while (j < size)
-	{
-		ascii[i++] = hexbase[((unsigned char *)&bytes)[j] / 16];
-		ascii[i++] = hexbase[((unsigned char *)&bytes)[j] % 16];
-		j++;
-	}
-	return (ascii);
-}
-
+/*
 char				*hash_md5(char *input, uint64_t input_len)
 {
 	char			*digested;
@@ -169,4 +152,52 @@ char				*hash_md5(char *input, uint64_t input_len)
 		++j;
 	}
 	return (digested);
+}
+*/
+
+//	TODO: define A = 0, B = 1, C = 2, D = 3 for ctx_b[A]/[B]/[C]/[D]
+void				hash_md5(t_context *ctx, char *chunk)
+{
+	uint32_t		ctx_b[4];
+	uint32_t		F, g;	//TODO
+	size_t			j;
+
+	ctx_b[0] = ctx->md5[0];
+	ctx_b[1] = ctx->md5[1];
+	ctx_b[2] = ctx->md5[2];
+	ctx_b[3] = ctx->md5[3];
+	j = 0;
+	while (j < 64)
+	{
+		if (j < 16)
+		{
+			F = (ctx_b[1] & ctx_b[2]) | (~ctx_b[1] & ctx_b[3]);
+			g = j;
+		}
+		else if (j < 32)
+		{
+			F = (ctx_b[1] & ctx_b[3]) | (ctx_b[2] & ~ctx_b[3]);
+			g = (5*j + 1) % 16;
+		}
+		else if (j < 48)
+		{
+			F = ctx_b[1] ^ ctx_b[2] ^ ctx_b[3];
+			g = (3*j + 5) % 16;
+		}
+		else
+		{
+			F = ctx_b[2] ^ (ctx_b[1] | ~ctx_b[3]);
+			g = (7*j) % 16;
+		}
+		F = F + ctx_b[0] + g_md5_k[j] + ((uint32_t *)chunk)[g];
+		ctx_b[0] = ctx_b[3];
+		ctx_b[3] = ctx_b[2];
+		ctx_b[2] = ctx_b[1];
+		ctx_b[1] = ctx_b[1] + LEFT_ROTATE(F, g_s[j]);
+		j++;
+	}
+	ctx->md5[0] += ctx_b[0];
+	ctx->md5[1] += ctx_b[1];
+	ctx->md5[2] += ctx_b[2];
+	ctx->md5[3] += ctx_b[3];
 }
