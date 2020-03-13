@@ -13,8 +13,6 @@ typedef struct	s_getopt
 	char	*oli;		// option letter list index
 }				t_getopt;
 
-#include <stdio.h>
-
 int				ft_getopt(int argc, char **argv, const char *optstr, int *ind)
 {
 	static t_getopt	opt = {1, 1, 0, NULL, NULL};

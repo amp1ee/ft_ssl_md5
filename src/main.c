@@ -57,18 +57,18 @@ void			swap_words(uint64_t *words, int wsize, int n)
 		: (((uint32_t *)words)[i] = swap_uint32(((uint32_t *)words)[i]));
 }
 
-void				digest_stdin(t_global *g)
+void					digest_stdin(t_global *g)
 {
 	(void)g;
 	return ;
 }
 
-char			*bytes_to_ascii(uint64_t bytes, size_t size)
+char				*bytes_to_ascii(uint64_t bytes, size_t size)
 {
-	const char	*hexbase = "0123456789abcdef";
-	char		*ascii;
-	size_t		i;
-	size_t		j;
+	const char		*hexbase = "0123456789abcdef";
+	char			*ascii;
+	size_t			i;
+	size_t			j;
 
 	if (!(ascii = ft_strnew(size << 1)))
 		return (NULL);
@@ -159,8 +159,12 @@ void				digest_files(t_global *g)
 		i = (t_input *)(arg->content);
 		if (i->type == F_FILE)
 		{
-			if ((fd = open((i->str), O_RDONLY)) < 0)
-				return ;														// TODO: handle error;
+			if ((fd = open((i->str), O_RDONLY)) <= 0)
+			{
+				printf("No such FILE: %s\n", i->str);
+				arg = arg->next;
+				continue ;	// TODO: handle error;
+			}
 			digest_fd(g, fd, i);
 			close(fd);
 			print_digest(g, i);
@@ -224,12 +228,14 @@ void					parse_options(t_global *g)
 		else if (opt == 'r')
 			g->flags |= REVERSE_FMT;
 		else if (opt == 's')
-		{
-			g->flags |= GIVEN_STRING; // Unneeded flag
 			save_input(g, optind, S_STRING);
-		}
 		else
 			print_usage();
+	}
+	if (optind != g->argc - 1)
+	{
+		while (++optind < g->argc)
+			save_input(g, optind, F_FILE);
 	}
 }
 
@@ -252,7 +258,8 @@ void				proceed_digest(t_global *g)
 			digest_final_chunk(g, i->str, i->str_len, i->str_len);
 			build_digest_message(g, i);
 		}
-		print_digest(g, i);
+		if (i->type != F_FILE)
+			print_digest(g, i);
 		arg = arg->next;
 	}
 	digest_files(g);

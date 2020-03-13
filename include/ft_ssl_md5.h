@@ -26,8 +26,7 @@ typedef enum			e_options
 {
 	PRINT_STDINOUT = 1,
 	QUIET_MODE = 2,
-	REVERSE_FMT = 4,
-	GIVEN_STRING = 8
+	REVERSE_FMT = 4
 }						t_option;
 
 typedef enum			e_hash_types
