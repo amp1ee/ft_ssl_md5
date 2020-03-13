@@ -104,73 +104,19 @@ void				build_digest_msg_sha2(t_input *arg, t_context ctx,
 void				hash_sha256(t_context *ctx, char *chunk)
 {
 	uint32_t		h[8];
-	size_t			j;
+	uint32_t		tmp[64];
+	int				j;
 
 	j = -1;
 	while (++j < 8)
 		h[j] = ctx->sha2[j];
-	swap_words((uint64_t *)chunk, sizeof(uint32_t), 16);
-	extend_words((uint32_t *)chunk);
+	ft_memcpy((void *)tmp, (void *)chunk, 64);
+	swap_words((uint64_t *)tmp, sizeof(uint32_t), 16);
+	extend_words((uint32_t *)tmp);
 	j = -1;
 	while (++j < 64)
-		compress_loop(h, (uint32_t *)chunk, j);
+		compress_loop(h, (uint32_t *)tmp, j);
 	j = -1;
 	while (++j < 8)
 		ctx->sha2[j] += h[j];
 }
-
-/*
-static void			process_blocks(char *padded, size_t input_len,
-									t_context *ctx)
-{
-	const size_t	padded_len = LEN_ALIGN(input_len);
-	size_t			i;
-	uint32_t		chunk[64];
-	uint32_t		h[8];
-	int 			j;
-
-	i = 0;
-	while (i < padded_len)
-	{
-		j = -1;
-		while (++j < 8)
-			h[j] = ctx->sha2[j];
-		ft_memcpy((void *)chunk, (void *)&padded[i], 64);
-		swap_words((uint64_t *)chunk, sizeof(uint32_t), 16);
-		extend_words(chunk);
-		j = -1;
-		while (++j < 64)
-			compress_loop(h, chunk, j);
-		j = -1;
-		while (++j < 8)
-			ctx->sha2[j] += h[j];
-		i += 64;
-	}
-}
-*/
-/*
-char				*hash_sha256(char *input, uint64_t input_len)
-{
-	char			*digested;
-	char			*tmp;
-	t_context		ctx;
-	size_t			j;
-
-	init_sha2_context(&ctx);
-	input = append_padding(input, input_len);
-	input = add_64bit_rep(input, swap_uint64(input_len << 3),
-										LEN_ALIGN(input_len));
-	process_blocks(input, input_len, &ctx);
-	ft_strdel(&input);
-	j = 0;
-	digested = ft_strnew(64);
-	while (j < 8)
-	{
-		tmp = bytes_to_ascii(swap_uint32(ctx.sha2[j]), sizeof(uint32_t));
-		ft_strncpy(digested + (j << 3), tmp, sizeof(uint32_t) << 1);
-		ft_strdel(&tmp);
-		j++;
-	}
-	return (digested);
-}
-*/

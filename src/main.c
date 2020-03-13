@@ -107,19 +107,20 @@ void				digest_final_chunk(t_global *g, char *buf, size_t read_len,
 
 void				digest_fd(t_global *g, int fd, t_input *arg)
 {
-	const unsigned	chunk_len = g->algo.chunk_len;
-	char			chunk[chunk_len];
+	size_t			chunk_len = (size_t)g->algo.chunk_len;
+	char			chunk[chunk_len + 1];
 	uint64_t		length;
-	int				ret;
+	ssize_t			ret;
 
 	ft_bzero(chunk, sizeof(chunk));
 	length = 0;
 	g->algo.init_ctx(&(g->algo.ctx));
-	while ((ret = read(fd, chunk, chunk_len)) > 0 && ret == (int)chunk_len)
+	while ((ret = read(fd, chunk, chunk_len)) > 0
+		&& (ret == (ssize_t)chunk_len))
 	{
 		g->algo.hashfunc(&(g->algo.ctx), chunk);
 		length += chunk_len;
-		ft_bzero(chunk, sizeof(chunk));
+		ft_bzero(chunk, sizeof(chunk) - 1);
 	}
 	if (ret < 0)
 		return ; // TODO: Handle error
@@ -163,6 +164,7 @@ void				identify_type(t_global *g)
 		if (ft_strequ(g->argv[1], g_algorithms[i].name))
 		{
 			g->algo = g_algorithms[i];
+			g->name = g_algorithms[i].name; // TODO: Capitalize command name
 			break ;
 		}
 		i++;
@@ -170,7 +172,7 @@ void				identify_type(t_global *g)
 	if (i == NUM_ALGOS)
 	{
 		g->algo.type = NO_TYPE;
-		ft_putendl("Invalid command");											// TODO: echo the command
+		ft_putendl("Invalid command");		// TODO: echo the command
 		print_usage();
 	}
 }
@@ -184,8 +186,8 @@ void				save_input(t_global *g, int optind, t_argtype atype)
 	arg.str = (optind) ? g->argv[optind] : "";
 	arg.str_len = (optind) ? ft_strlen(g->argv[optind]) : 0;
 	if (!(new = ft_lstnew((void *)&arg, sizeof(t_input))))
-		return ;																// TODO: malloc error handling
-	ft_lstadd(&(g->inputs), new);												// TODO: append instead of prepend to list
+		return ;					// TODO: malloc error handling
+	ft_lstadd(&(g->inputs), new);	// TODO: append instead of prepend to list
 }
 
 void					parse_options(t_global *g)

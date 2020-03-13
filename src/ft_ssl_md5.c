@@ -102,10 +102,6 @@ void				hash_md5(t_context *ctx, char *chunk)
 	ctx_b[1] = ctx->md5[1];
 	ctx_b[2] = ctx->md5[2];
 	ctx_b[3] = ctx->md5[3];
-/*	printf("%x\n", ctx->md5[0]);
-	printf("%x\n", ctx->md5[1]);
-	printf("%x\n", ctx->md5[2]);
-	printf("%x\n", ctx->md5[3]);*/
 	j = 0;
 	while (j < 64)
 	{
@@ -140,93 +136,4 @@ void				hash_md5(t_context *ctx, char *chunk)
 	ctx->md5[1] += ctx_b[1];
 	ctx->md5[2] += ctx_b[2];
 	ctx->md5[3] += ctx_b[3];
-/*	printf("%x\n", ctx->md5[0]);
-	printf("%x\n", ctx->md5[1]);
-	printf("%x\n", ctx->md5[2]);
-	printf("%x\n", ctx->md5[3]);*/
 }
-
-/*
-static void			process_blocks(char *padded, size_t input_len,
-									t_context *ctx)
-{
-	const size_t	padded_len = LEN_ALIGN(input_len);
-	size_t			i;
-	char			chunk[64];
-	uint32_t		A, B, C, D, j;
-	uint32_t		F, g;
-
-	i = 0;
-	while (i < padded_len)
-	{
-		ft_memcpy(chunk, &padded[i], 64);
-		A = ctx->md5[0];
-		B = ctx->md5[1];
-		C = ctx->md5[2];
-		D = ctx->md5[3];
-		j = 0;
-		while (j < 64)
-		{
-			if (j < 16)
-			{
-				F = (B & C) | (~B & D);
-				g = j;
-			}
-			else if (j < 32)
-			{
-				F = (B & D) | (C & ~D);
-				g = (5*j + 1) % 16;
-			}
-			else if (j < 48)
-			{
-				F = B ^ C ^ D;
-				g = (3*j + 5) % 16;
-			}
-			else
-			{
-				F = C ^ (B | ~D);
-				g = (7*j) % 16;
-			}
-			F = F + A + MD5_K[j] + ((uint32_t *)chunk)[g];
-			A = D;
-			D = C;
-			C = B;
-			B = B + LEFT_ROTATE(F, s[j]);
-			j++;
-		}
-		ctx->md5[0] += A;
-		ctx->md5[1] += B;
-		ctx->md5[2] += C;
-		ctx->md5[3] += D;
-		i += 64;
-	}
-}
-*/
-
-/*
-char				*hash_md5(char *input, uint64_t input_len)
-{
-	char			*digested;
-	char			*tmp;
-	t_context		ctx;
-	size_t			j;
-
-	init_md5_context(&ctx);
-	input = append_padding(input, input_len);
-	input = add_64bit_rep(input, input_len << 3, LEN_ALIGN(input_len));
-
-	process_blocks(input, input_len, &ctx);
-	ft_strdel(&input);
-
-	j = 0;
-	digested = ft_strnew(32);
-	while (j < 4)
-	{
-		tmp = bytes_to_ascii(ctx.md5[j], sizeof(uint32_t));
-		ft_strncpy(digested + (j << 3), tmp, sizeof(uint32_t) << 1);
-		ft_strdel(&tmp);
-		++j;
-	}
-	return (digested);
-}
-*/
