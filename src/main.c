@@ -96,7 +96,7 @@ void				build_digest_message(t_global *g, t_input *arg)
 	j = 0;
 	while (j < out_len)
 	{
-		tmp = bytes_to_ascii(swap_uint32(ctx_buf[j]), sizeof(uint32_t));
+		tmp = bytes_to_ascii(ctx_buf[j], sizeof(uint32_t));
 		ft_strncpy(arg->digest + (j << 3), tmp, sizeof(uint32_t) << 1);
 		ft_strdel(&tmp);
 		j++;
@@ -119,7 +119,7 @@ void				digest_final_chunk(t_global *g, char *buf, size_t read_len,
 	i = 0;
 	while (i < ((unsigned)aligned_len / alg.chunk_len))
 	{
-		alg.hashfunc(&(g->algo.ctx), buf);
+		alg.hashfunc(&(g->algo.ctx), buf + alg.chunk_len * i);
 		i++;
 	}
 	ft_strdel(&buf);
@@ -254,7 +254,7 @@ void				proceed_digest(t_global *g)
 			digest_stdin(g);
 		else if (i->type == S_STRING)
 		{
-			algo.init_ctx(&(algo.ctx));
+			algo.init_ctx(&(g->algo.ctx));
 			digest_final_chunk(g, i->str, i->str_len, i->str_len);
 			build_digest_message(g, i);
 		}

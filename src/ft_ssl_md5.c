@@ -35,7 +35,7 @@ char				*append_padding_md5sha2(char *input, uint64_t input_len)
 	if (!(padded = ft_memalloc(padded_len)))
 		return (NULL);
 	ft_memcpy(padded, input, input_len);
-	if (++input_len <= (padded_len - 8))
+	if (++input_len <= (padded_len - 8))	//TODO: get rid of this 'if'
 		padded[input_len - 1] = 0x80;
 	while (++input_len <= (padded_len - 8))
 		padded[input_len - 1] = 0x0;
@@ -68,6 +68,61 @@ void				init_md5_context(t_context *ctx)
 	ctx->md5[1] = b0;
 	ctx->md5[2] = c0;
 	ctx->md5[3] = d0;
+}
+
+//	TODO: define A = 0, B = 1, C = 2, D = 3 for ctx_b[A]/[B]/[C]/[D]
+void				hash_md5(t_context *ctx, char *chunk)
+{
+	uint32_t		ctx_b[4];
+	uint32_t		F, g;	//TODO
+	size_t			j;
+
+	ctx_b[0] = ctx->md5[0];
+	ctx_b[1] = ctx->md5[1];
+	ctx_b[2] = ctx->md5[2];
+	ctx_b[3] = ctx->md5[3];
+/*	printf("%x\n", ctx->md5[0]);
+	printf("%x\n", ctx->md5[1]);
+	printf("%x\n", ctx->md5[2]);
+	printf("%x\n", ctx->md5[3]);*/
+	j = 0;
+	while (j < 64)
+	{
+		if (j < 16)
+		{
+			F = (ctx_b[1] & ctx_b[2]) | (~ctx_b[1] & ctx_b[3]);
+			g = j;
+		}
+		else if (j < 32)
+		{
+			F = (ctx_b[1] & ctx_b[3]) | (ctx_b[2] & ~ctx_b[3]);
+			g = (5*j + 1) % 16;
+		}
+		else if (j < 48)
+		{
+			F = ctx_b[1] ^ ctx_b[2] ^ ctx_b[3];
+			g = (3*j + 5) % 16;
+		}
+		else
+		{
+			F = ctx_b[2] ^ (ctx_b[1] | ~ctx_b[3]);
+			g = (7*j) % 16;
+		}
+		F = F + ctx_b[0] + g_md5_k[j] + ((uint32_t *)chunk)[g];
+		ctx_b[0] = ctx_b[3];
+		ctx_b[3] = ctx_b[2];
+		ctx_b[2] = ctx_b[1];
+		ctx_b[1] = ctx_b[1] + LEFT_ROTATE(F, g_s[j]);
+		j++;
+	}
+	ctx->md5[0] += ctx_b[0];
+	ctx->md5[1] += ctx_b[1];
+	ctx->md5[2] += ctx_b[2];
+	ctx->md5[3] += ctx_b[3];
+/*	printf("%x\n", ctx->md5[0]);
+	printf("%x\n", ctx->md5[1]);
+	printf("%x\n", ctx->md5[2]);
+	printf("%x\n", ctx->md5[3]);*/
 }
 
 /*
@@ -154,50 +209,3 @@ char				*hash_md5(char *input, uint64_t input_len)
 	return (digested);
 }
 */
-
-//	TODO: define A = 0, B = 1, C = 2, D = 3 for ctx_b[A]/[B]/[C]/[D]
-void				hash_md5(t_context *ctx, char *chunk)
-{
-	uint32_t		ctx_b[4];
-	uint32_t		F, g;	//TODO
-	size_t			j;
-
-	ctx_b[0] = ctx->md5[0];
-	ctx_b[1] = ctx->md5[1];
-	ctx_b[2] = ctx->md5[2];
-	ctx_b[3] = ctx->md5[3];
-	j = 0;
-	while (j < 64)
-	{
-		if (j < 16)
-		{
-			F = (ctx_b[1] & ctx_b[2]) | (~ctx_b[1] & ctx_b[3]);
-			g = j;
-		}
-		else if (j < 32)
-		{
-			F = (ctx_b[1] & ctx_b[3]) | (ctx_b[2] & ~ctx_b[3]);
-			g = (5*j + 1) % 16;
-		}
-		else if (j < 48)
-		{
-			F = ctx_b[1] ^ ctx_b[2] ^ ctx_b[3];
-			g = (3*j + 5) % 16;
-		}
-		else
-		{
-			F = ctx_b[2] ^ (ctx_b[1] | ~ctx_b[3]);
-			g = (7*j) % 16;
-		}
-		F = F + ctx_b[0] + g_md5_k[j] + ((uint32_t *)chunk)[g];
-		ctx_b[0] = ctx_b[3];
-		ctx_b[3] = ctx_b[2];
-		ctx_b[2] = ctx_b[1];
-		ctx_b[1] = ctx_b[1] + LEFT_ROTATE(F, g_s[j]);
-		j++;
-	}
-	ctx->md5[0] += ctx_b[0];
-	ctx->md5[1] += ctx_b[1];
-	ctx->md5[2] += ctx_b[2];
-	ctx->md5[3] += ctx_b[3];
-}
