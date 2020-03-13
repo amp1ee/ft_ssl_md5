@@ -83,26 +83,6 @@ char				*bytes_to_ascii(uint64_t bytes, size_t size)
 	return (ascii);
 }
 
-void				build_digest_message(t_global *g, t_input *arg)
-{
-	char			*tmp;
-	uint32_t		*ctx_buf;
-	size_t			j;
-	size_t			out_len;
-
-	ctx_buf = (g->algo.type == MD5) ? g->algo.ctx.md5 : g->algo.ctx.sha2;
-	arg->digest = ft_strnew(g->algo.digest_len);
-	out_len = (g->algo.digest_len << 3) / g->algo.chunk_len;
-	j = 0;
-	while (j < out_len)
-	{
-		tmp = bytes_to_ascii(ctx_buf[j], sizeof(uint32_t));
-		ft_strncpy(arg->digest + (j << 3), tmp, sizeof(uint32_t) << 1);
-		ft_strdel(&tmp);
-		j++;
-	}
-}
-
 void				digest_final_chunk(t_global *g, char *buf, size_t read_len,
 										uint64_t append_len)
 {
@@ -144,7 +124,7 @@ void				digest_fd(t_global *g, int fd, t_input *arg)
 	if (ret < 0)
 		return ; // TODO: Handle error
 	digest_final_chunk(g, chunk, ret, length + ret);
-	build_digest_message(g, arg);
+	g->algo.build_digest_msg(arg, g->algo.ctx, g->algo.digest_len, chunk_len);
 }
 
 void				digest_files(t_global *g)
@@ -241,11 +221,11 @@ void					parse_options(t_global *g)
 
 void				proceed_digest(t_global *g)
 {
-	t_algo			algo;
+	t_algo			alg;
 	t_list			*arg;
 	t_input			*i;
 
-	algo = g->algo;
+	alg = g->algo;
 	arg = g->inputs;
 	while (arg != NULL)
 	{
@@ -254,9 +234,9 @@ void				proceed_digest(t_global *g)
 			digest_stdin(g);
 		else if (i->type == S_STRING)
 		{
-			algo.init_ctx(&(g->algo.ctx));
+			alg.init_ctx(&(g->algo.ctx));
 			digest_final_chunk(g, i->str, i->str_len, i->str_len);
-			build_digest_message(g, i);
+			alg.build_digest_msg(i, g->algo.ctx, alg.digest_len, alg.chunk_len);
 		}
 		if (i->type != F_FILE)
 			print_digest(g, i);

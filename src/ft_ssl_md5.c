@@ -27,6 +27,27 @@ uint32_t		g_md5_k[64] = {
 	0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391 
 };
 
+void				build_digest_msg_md5(t_input *arg, t_context ctx,
+										unsigned digest_len, unsigned chunk_len)
+{
+	char			*tmp;
+	uint32_t		*ctx_buf;
+	size_t			j;
+	size_t			out_len;
+
+	ctx_buf = ctx.md5;
+	arg->digest = ft_strnew(digest_len);
+	out_len = (digest_len << 3) / chunk_len;
+	j = 0;
+	while (j < out_len)
+	{
+		tmp = bytes_to_ascii(ctx_buf[j], sizeof(uint32_t));
+		ft_strncpy(arg->digest + (j << 3), tmp, sizeof(uint32_t) << 1);
+		ft_strdel(&tmp);
+		j++;
+	}
+}
+
 char				*append_padding_md5sha2(char *input, uint64_t input_len)
 {
 	const uint64_t	padded_len = LEN_ALIGN(input_len); // TODO: get rid of this

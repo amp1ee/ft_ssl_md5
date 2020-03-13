@@ -80,6 +80,45 @@ static void		compress_loop(uint32_t *h, uint32_t *sched, int j)
 	h[0] = tmp[4] + tmp[5];
 }
 
+void				build_digest_msg_sha2(t_input *arg, t_context ctx,
+										unsigned digest_len, unsigned chunk_len)
+{
+	char			*tmp;
+	uint32_t		*ctx_buf;
+	size_t			j;
+	size_t			out_len;
+
+	ctx_buf = ctx.sha2;
+	arg->digest = ft_strnew(digest_len);
+	out_len = (digest_len << 3) / chunk_len;
+	j = 0;
+	while (j < out_len)
+	{
+		tmp = bytes_to_ascii(swap_uint32(ctx_buf[j]), sizeof(uint32_t));
+		ft_strncpy(arg->digest + (j << 3), tmp, sizeof(uint32_t) << 1);
+		ft_strdel(&tmp);
+		j++;
+	}
+}
+
+void				hash_sha256(t_context *ctx, char *chunk)
+{
+	uint32_t		h[8];
+	size_t			j;
+
+	j = -1;
+	while (++j < 8)
+		h[j] = ctx->sha2[j];
+	swap_words((uint64_t *)chunk, sizeof(uint32_t), 16);
+	extend_words((uint32_t *)chunk);
+	j = -1;
+	while (++j < 64)
+		compress_loop(h, (uint32_t *)chunk, j);
+	j = -1;
+	while (++j < 8)
+		ctx->sha2[j] += h[j];
+}
+
 /*
 static void			process_blocks(char *padded, size_t input_len,
 									t_context *ctx)
@@ -135,21 +174,3 @@ char				*hash_sha256(char *input, uint64_t input_len)
 	return (digested);
 }
 */
-
-void				hash_sha256(t_context *ctx, char *chunk)
-{
-	uint32_t		h[8];
-	size_t			j;
-
-	j = -1;
-	while (++j < 8)
-		h[j] = ctx->sha2[j];
-	swap_words((uint64_t *)chunk, sizeof(uint32_t), 16);
-	extend_words((uint32_t *)chunk);
-	j = -1;
-	while (++j < 64)
-		compress_loop(h, (uint32_t *)chunk, j);
-	j = -1;
-	while (++j < 8)
-		ctx->sha2[j] += h[j];
-}

@@ -8,15 +8,6 @@
 # include "libft.h"
 
 # define LEN_ALIGN(x)		(((((((x + 9) << 3) + 511) & ~511)) >> 3))
-/*# define ENDIAN_SWP(x) \
-		 ((((x) & 0xff00000000000000ull) >> 56)					\
-		| (((x) & 0x00ff000000000000ull) >> 40)					\
-		| (((x) & 0x0000ff0000000000ull) >> 24)					\
-		| (((x) & 0x000000ff00000000ull) >> 8)					\
-		| (((x) & 0x00000000ff000000ull) << 8)					\
-		| (((x) & 0x0000000000ff0000ull) << 24)					\
-		| (((x) & 0x000000000000ff00ull) << 40)					\
-		| (((x) & 0x00000000000000ffull) << 56))*/
 # define LEFT_ROTATE(x, c)	(((x) << (c)) | ((x) >> (32-(c))))
 # define RIGHT_ROTATE(x, c)	(((x) >> (c)) | ((x) << (32-(c))))
 
@@ -42,20 +33,6 @@ typedef struct			s_context
 	uint32_t			md5[4];
 }						t_context;
 
-typedef struct			s_algorithm
-{
-	char				*name;
-	t_hash_type			type;
-	void				(*hashfunc)(t_context *ctx, char *chunk);
-	void				(*init_ctx)(t_context *ctx);
-	char				*(*append_padding)(char *input, uint64_t input_len);
-	char				*(*add_64bit_len)(char *input, uint64_t input_len,
-										uint64_t padded_len);
-	unsigned			digest_len;
-	unsigned			chunk_len;
-	t_context			ctx;
-}						t_algo;
-
 typedef enum			e_argtypes
 {
 	ERR_TYPE = 0,
@@ -71,6 +48,22 @@ typedef struct			s_input_arg
 	char				*digest;
 	size_t				str_len;
 }						t_input;
+
+typedef struct			s_algorithm
+{
+	char				*name;
+	t_hash_type			type;
+	void				(*hashfunc)(t_context *ctx, char *chunk);
+	void				(*init_ctx)(t_context *ctx);
+	char				*(*append_padding)(char *input, uint64_t input_len);
+	char				*(*add_64bit_len)(char *input, uint64_t input_len,
+										uint64_t padded_len);
+	void				(*build_digest_msg)(t_input *arg, t_context ctx,
+								unsigned digest_len, unsigned chunk_len);
+	unsigned			digest_len;
+	unsigned			chunk_len;
+	t_context			ctx;
+}						t_algo;
 
 // TODO: rename?
 typedef struct			s_global
@@ -94,13 +87,22 @@ void					hash_sha256(t_context *ctx, char *chunk);
 void					init_sha2_context(t_context *ctx);
 void					init_md5_context(t_context *ctx);
 
+void					build_digest_msg_md5(t_input *arg, t_context ctx,
+								unsigned digest_len, unsigned chunk_len);
+void					build_digest_msg_sha2(t_input *arg, t_context ctx,
+								unsigned digest_len, unsigned chunk_len);
+
+uint32_t				swap_uint32(uint32_t val);
+uint64_t				swap_uint64(uint64_t val);
 void					swap_words(uint64_t *words, int wsize, int n);
 
 static const t_algo			g_algorithms[] = {
 	{"md5", MD5, hash_md5, init_md5_context, append_padding_md5sha2,
-	add_64bit_len_md5sha2, .digest_len = 32, .chunk_len = 64 },
+	add_64bit_len_md5sha2, build_digest_msg_md5,
+	.digest_len = 32, .chunk_len = 64 },
 	{"sha256", SHA256, hash_sha256, init_sha2_context, append_padding_md5sha2,
-	add_64bit_len_md5sha2, .digest_len = 64, .chunk_len = 64 }
+	add_64bit_len_md5sha2, build_digest_msg_sha2,
+	.digest_len = 64, .chunk_len = 64 }
 };
 
 # define NUM_ALGOS (sizeof(g_algorithms) / sizeof(t_algo))
