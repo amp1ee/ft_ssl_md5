@@ -35,10 +35,11 @@ typedef struct			s_context
 
 typedef enum			e_argtypes
 {
-	ERR_TYPE = 0,
+	EMPTY = 0,
 	P_STDIN,
 	S_STRING,
-	F_FILE
+	F_FILE,
+	ERR
 }						t_argtype;
 
 typedef struct			s_input_arg
