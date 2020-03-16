@@ -222,6 +222,10 @@ void				save_input(t_global *g, int optind, t_argtype atype)
 	t_input			arg;
 
 	arg.type = atype;
+	//printf("%d\n", optind);
+	if (optind > 1 && !(ft_strncmp(g->argv[optind], "-s", 2)) &&
+						!(ft_strequ(g->argv[optind - 1], "-s")))
+		g->argv[optind] = &(g->argv[optind][2]);
 	arg.str = (optind > 0) ? g->argv[optind] : "";
 	arg.str_len = (optind > 0) ? ft_strlen(g->argv[optind]) : 0;
 	if (!(new = ft_lstnew((void *)&arg, sizeof(t_input))))
@@ -251,8 +255,8 @@ void				parse_options(t_global *g)
 		else
 			print_usage();
 	}
-//	printf("OPTIND:%d\n", optind);
-	if (optind < g->argc - 1)
+	//printf("OPTIND:%d\n", optind);
+	if (optind < g->argc - 1 && optind != 0)
 	{
 		while (++optind < g->argc)
 			save_input(g, optind, F_FILE);
