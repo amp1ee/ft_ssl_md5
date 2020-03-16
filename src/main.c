@@ -22,9 +22,9 @@ void				print_digest(t_global *g, t_input *arg)
 			printf(((arg->type == S_STRING) ? "%s (\"%s\") = %s\n"
 				: "%s (%s) = %s\n"), g->algo.name, arg->str, arg->digest);
 	}
-	/*else if (arg->atype == empty)
-		printf("%s\n", arg->hash);
-	else if (arg->atype == error)
+	else if (arg->type == EMPTY)
+		printf("%s\n", arg->digest);
+	/*else if (arg->atype == error)
 		(arg->hash) ?
 		printf("ft_ssl: %s: %s: %s\n", ssl->algo.str, arg->str, arg->digest)
 		: printf("ft_ssl: %s: %s\n", ssl->algo.str, arg->str);*/
@@ -251,7 +251,7 @@ void				parse_options(t_global *g)
 		else
 			print_usage();
 	}
-	printf("OPTIND:%d\n", optind);
+//	printf("OPTIND:%d\n", optind);
 	if (optind < g->argc - 1)
 	{
 		while (++optind < g->argc)
