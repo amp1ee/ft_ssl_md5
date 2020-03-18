@@ -255,8 +255,8 @@ void				parse_options(t_global *g)
 		else
 			print_usage();
 	}
-	//printf("OPTIND:%d\n", optind);
-	if (optind < g->argc - 1 && optind != 0)
+//	printf("OPTIND:%d, argc-1: %d\n", optind, g->argc - 1);
+	if ((optind < g->argc - 1 && optind != 0) || optind++ == 0)
 	{
 		while (++optind < g->argc)
 			save_input(g, optind, F_FILE);
@@ -297,7 +297,7 @@ int					main(int argc, char *argv[])
 
 	// TODO: (g->inputs = NULL) here?
 	if (argc == 1) //	./ft_ssl w/o command
-		digest_stdin(&g, NULL); //TODO
+		digest_stdin(&g, NULL); //TODO OpenSSL behavior
 	else
 	{
 		g.argc = argc;
