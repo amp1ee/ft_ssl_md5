@@ -263,6 +263,7 @@ void				parse_options(t_global *g)
 	}
 	if (!g->inputs)
 		save_input(g, 0, EMPTY);
+	ft_lstreverse(&(g->inputs));
 }
 
 void				proceed_digest(t_global *g)
