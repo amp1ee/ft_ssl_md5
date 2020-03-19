@@ -34,7 +34,8 @@ SRC		= ft_memcpy.c	ft_putstr.c		\
 		ft_lstfold.c	ft_itoa_base.c	\
 		get_next_line.c	ft_atoi_base.c	\
 		ft_lstreverse.c	ft_strpos.c		\
-		ft_atof.c		ft_getopt.c
+		ft_atof.c		ft_getopt.c		\
+		ft_upperstr.c
 
 .PHONY: all clean fclean re
 

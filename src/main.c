@@ -20,7 +20,7 @@ void				print_digest(t_global *g, t_input *arg)
 				arg->digest, arg->str);
 		else
 			printf(((arg->type == S_STRING) ? "%s (\"%s\") = %s\n"
-				: "%s (%s) = %s\n"), g->algo.name, arg->str, arg->digest);
+				: "%s (%s) = %s\n"), g->name, arg->str, arg->digest);
 	}
 	else if (arg->type == EMPTY)
 		printf("%s\n", arg->digest);
@@ -203,7 +203,7 @@ void				identify_type(t_global *g)
 		if (ft_strequ(g->argv[1], g_algorithms[i].name))
 		{
 			g->algo = g_algorithms[i];
-			g->name = g_algorithms[i].name; // TODO: Capitalize command name
+			g->name = ft_upperstr(g_algorithms[i].name);
 			break ;
 		}
 		i++;
@@ -223,14 +223,14 @@ void				save_input(t_global *g, int optind, t_argtype atype)
 
 	arg.type = atype;
 	//printf("%d\n", optind);
-	if (optind > 1 && !(ft_strncmp(g->argv[optind], "-s", 2)) &&
-						!(ft_strequ(g->argv[optind - 1], "-s")))
+	if (atype != F_FILE && optind > 1 && !(ft_strncmp(g->argv[optind], "-s", 2))
+									&& !(ft_strequ(g->argv[optind - 1], "-s")))
 		g->argv[optind] = &(g->argv[optind][2]);
 	arg.str = (optind > 0) ? g->argv[optind] : "";
 	arg.str_len = (optind > 0) ? ft_strlen(g->argv[optind]) : 0;
 	if (!(new = ft_lstnew((void *)&arg, sizeof(t_input))))
 		return ;					// TODO: malloc error handling
-	ft_lstadd(&(g->inputs), new);	// TODO: append instead of prepend to list
+	ft_lstadd(&(g->inputs), new);
 }
 
 void				parse_options(t_global *g)

@@ -110,5 +110,6 @@ void				ft_lstreverse(t_list **head);
 int					ft_strpos(char *line, char c);
 int					ft_getopt(int argc, char **argv, const char *optstr,
 						int *ind);
+char				*ft_upperstr(char *str);
 
 #endif
