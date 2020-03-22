@@ -181,7 +181,9 @@ void				digest_files(t_global *g)
 		{
 			if ((fd = open((i->str), O_RDONLY)) <= 0)
 			{
-				printf("No such FILE: %s\n", i->str);
+				// TODO: ft_strrchr('/') to find the binary name (ft_ssl)
+				printf("ft_ssl: %s: %s: No such file or directory\n",
+						g->algo.name, i->str);
 				arg = arg->next;
 				continue ;	// TODO: handle error;
 			}
