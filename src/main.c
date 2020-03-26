@@ -6,26 +6,50 @@ void				print_usage(void)
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
 }
 
-// TODO !!
+void				print_hash_stdin(t_input *arg)
+{
+	ft_putstr(arg->str);
+	ft_putendl(arg->digest);
+}
+
+void				print_hash_revfmt(t_input *arg)
+{
+	ft_putstr(arg->digest);
+	ft_putchar(' ');
+	(arg->type == S_STRING) ? ft_putchar('"') : 0;
+	ft_putstr(arg->str);
+	(arg->type == S_STRING) ? ft_putchar('"') : 0;
+	ft_putchar('\n');
+}
+
+void				print_hash_default(char *algo_name, t_input *arg)
+{
+	ft_putstr(algo_name);
+	ft_putstr(" (");
+	(arg->type == S_STRING) ? ft_putchar('"') : 0;
+	ft_putstr(arg->str);
+	(arg->type == S_STRING) ? ft_putchar('"') : 0;
+	ft_putstr(") = ");
+	ft_putendl(arg->digest);
+}
+
 void				print_digest(t_global *g, t_input *arg)
 {
 	if (arg->type == P_STDIN)
-		printf("%s%s\n", arg->str, arg->digest);
+		print_hash_stdin(arg);
 	else if (arg->type == S_STRING || arg->type == F_FILE)
 	{
 		if (g->flags & QUIET_MODE)
-			printf("%s\n", arg->digest);
+			ft_putendl(arg->digest);
 		else if (g->flags & REVERSE_FMT)
-			printf(((arg->type == S_STRING) ? "%s \"%s\"\n" : "%s %s\n"),
-				arg->digest, arg->str);
+			print_hash_revfmt(arg);
 		else
-			printf(((arg->type == S_STRING) ? "%s (\"%s\") = %s\n"
-				: "%s (%s) = %s\n"), g->name, arg->str, arg->digest);
+			print_hash_default(g->name, arg);
 	}
 	else if (arg->type == EMPTY)
-		printf("%s\n", arg->digest);
+		ft_putendl(arg->digest);
 	/*else if (arg->atype == error)
-		(arg->hash) ?
+		(arg->digest) ?
 		printf("ft_ssl: %s: %s: %s\n", ssl->algo.str, arg->str, arg->digest)
 		: printf("ft_ssl: %s: %s\n", ssl->algo.str, arg->str);*/
 }
@@ -279,7 +303,7 @@ void				proceed_digest(t_global *g)
 	while (arg != NULL)
 	{
 		i = (t_input *)(arg->content);
-		if (i->type == P_STDIN || i->type == EMPTY)			//TODO: OR == EMPTY
+		if (i->type == P_STDIN || i->type == EMPTY)
 			digest_stdin(g, i);
 		else if (i->type == S_STRING)
 		{
