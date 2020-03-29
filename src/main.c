@@ -205,9 +205,13 @@ void				digest_files(t_global *g)
 		{
 			if ((fd = open((i->str), O_RDONLY)) <= 0)
 			{
-				// TODO: ft_strrchr('/') to find the binary name (ft_ssl)
-				printf("ft_ssl: %s: %s: No such file or directory\n",
-						g->algo.name, i->str);
+				ft_putstr(g->self_name);
+				ft_putstr(": ");
+				ft_putstr(g->algo.name);
+				ft_putstr(": ");
+				ft_putstr(i->str);
+				ft_putstr(": ");
+				ft_putendl(strerror(errno));
 				arg = arg->next;
 				continue ;	// TODO: handle error;
 			}
@@ -323,6 +327,7 @@ int					main(int argc, char *argv[])
 	t_global	g;
 
 	// TODO: (g->inputs = NULL) here?
+	g.self_name = ft_strrchr(argv[0], '/') + 1; // TODO: Handle when no '/'
 	if (argc == 1) //	./ft_ssl w/o command
 		digest_stdin(&g, NULL); //TODO OpenSSL behavior
 	else

@@ -4,6 +4,8 @@
 # include <stdlib.h>
 # include <unistd.h>
 # include <fcntl.h>
+# include <stdio.h>
+# include <errno.h>
 # include <stdint.h>
 # include "libft.h"
 
@@ -70,6 +72,7 @@ typedef struct			s_algorithm
 typedef struct			s_global
 {
 	t_algo				algo;
+	char				*self_name;
 	char				*name;
 	int					argc;
 	char				**argv;
