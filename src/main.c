@@ -322,12 +322,21 @@ void				proceed_digest(t_global *g)
 	digest_files(g);
 }
 
+void				set_self_name(t_global *g, char *argv0)
+{
+	char			*slash_pos;
+
+	if ((slash_pos = ft_strrchr(argv0, '/')) != NULL)
+		g->self_name = slash_pos + 1;
+	else
+		g->self_name = argv0;
+}
+
 int					main(int argc, char *argv[])
 {
 	t_global	g;
 
-	// TODO: (g->inputs = NULL) here?
-	g.self_name = ft_strrchr(argv[0], '/') + 1; // TODO: Handle when no '/'
+	set_self_name(&g, argv[0]);
 	if (argc == 1) //	./ft_ssl w/o command
 		digest_stdin(&g, NULL); //TODO OpenSSL behavior
 	else
