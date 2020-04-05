@@ -26,7 +26,8 @@ typedef enum			e_hash_types
 {
 	NO_TYPE = 0,
 	MD5,
-	SHA256
+	SHA256,
+	SHA224
 }						t_hash_type;
 
 typedef struct			s_context
@@ -86,10 +87,11 @@ char					*add_64bit_len_md5sha2(char *input, uint64_t append_len,
 char					*bytes_to_ascii(uint64_t bytes, size_t size);
 
 void					hash_md5(t_context *ctx, char *chunk);
-void					hash_sha256(t_context *ctx, char *chunk);
+void					hash_sha2(t_context *ctx, char *chunk);
 
-void					init_sha2_context(t_context *ctx);
 void					init_md5_context(t_context *ctx);
+void					init_sha256_context(t_context *ctx);
+void					init_sha224_context(t_context *ctx);
 
 void					build_digest_msg_md5(t_input *arg, t_context ctx,
 								unsigned digest_len, unsigned chunk_len);
@@ -104,9 +106,12 @@ static const t_algo			g_algorithms[] = {
 	{"md5", MD5, hash_md5, init_md5_context, append_padding_md5sha2,
 	add_64bit_len_md5sha2, build_digest_msg_md5,
 	.digest_len = 32, .chunk_len = 64 },
-	{"sha256", SHA256, hash_sha256, init_sha2_context, append_padding_md5sha2,
+	{"sha256", SHA256, hash_sha2, init_sha256_context, append_padding_md5sha2,
 	add_64bit_len_md5sha2, build_digest_msg_sha2,
-	.digest_len = 64, .chunk_len = 64 }
+	.digest_len = 64, .chunk_len = 64 },
+	{"sha224", SHA224, hash_sha2, init_sha224_context, append_padding_md5sha2,
+	add_64bit_len_md5sha2, build_digest_msg_sha2,
+	.digest_len = 56, .chunk_len = 64 }
 };
 
 # define NUM_ALGOS (sizeof(g_algorithms) / sizeof(t_algo))

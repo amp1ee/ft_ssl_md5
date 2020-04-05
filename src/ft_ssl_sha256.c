@@ -3,7 +3,7 @@
 // delete these:
 #include <stdio.h>
 
-void				init_sha2_context(t_context *ctx)
+void				init_sha256_context(t_context *ctx)
 {
 	ctx->sha2[0] = 0x6A09E667;
 	ctx->sha2[1] = 0xBB67AE85;
@@ -82,7 +82,7 @@ void				build_digest_msg_sha2(t_input *arg, t_context ctx,
 	}
 }
 
-void				hash_sha256(t_context *ctx, char *chunk)
+void				hash_sha2(t_context *ctx, char *chunk)
 {
 	uint32_t		h[8];
 	uint32_t		tmp[64];
