@@ -21,8 +21,7 @@ char				*append_padding_sha5(char *input, uint128_t input_len)
 	if (!(padded = ft_memalloc(padded_len)))
 		return (NULL);
 	ft_memcpy(padded, input, input_len);
-	if (++input_len <= (padded_len - 16))	//TODO: get rid of this 'if'
-		padded[input_len - 1] = 0x80;
+	padded[++input_len - 1] = 0x80;
 	while (++input_len <= (padded_len - 16))
 		padded[input_len - 1] = 0x0;
 	return (padded);
