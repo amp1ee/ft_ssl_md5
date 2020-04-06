@@ -8,7 +8,9 @@ SRC = $(addprefix $(SRCDIR),	main.c			\
 								ft_ssl_md5.c	\
 								ft_ssl_sha256.c	\
 								ft_ssl_sha224.c \
-								ft_ssl_sha512.c )
+								ft_ssl_sha512.c \
+								ft_ssl_sha384.c \
+								)
 OBJ = $(SRC:$(SRCDIR)%.c=$(OBJDIR)%.o)
 HEADERS = $(wildcard $(INCDIR)*.h)
 

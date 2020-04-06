@@ -1,5 +1,5 @@
 #include "ft_ssl_md5.h"
-#include "ft_sha512.h"
+#include "ft_sha5.h"
 
 void				init_sha512_context(t_context *ctx)
 {

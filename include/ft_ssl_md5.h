@@ -30,7 +30,8 @@ typedef enum			e_hash_types
 	MD5,
 	SHA256,
 	SHA224,
-	SHA512
+	SHA512,
+	SHA384
 }						t_hash_type;
 
 typedef struct			s_context
@@ -103,6 +104,7 @@ void					init_md5_context(t_context *ctx);
 void					init_sha256_context(t_context *ctx);
 void					init_sha224_context(t_context *ctx);
 void					init_sha512_context(t_context *ctx);
+void					init_sha384_context(t_context *ctx);
 
 void					build_digest_msg_md5(t_input *arg, t_context ctx,
 								unsigned digest_len, unsigned chunk_len);
@@ -127,7 +129,10 @@ static const t_algo			g_algorithms[] = {
 	.digest_len = 56, .chunk_len = 64 },
 	{"sha512", SHA512, hash_sha5, init_sha512_context, append_padding_sha5,
 	add_128bit_len_sha5, build_digest_msg_sha5,
-	.digest_len = 128, .chunk_len = 128 }
+	.digest_len = 128, .chunk_len = 128 },
+	{"sha384", SHA384, hash_sha5, init_sha384_context, append_padding_sha5,
+	add_128bit_len_sha5, build_digest_msg_sha5,
+	.digest_len = 96, .chunk_len = 128 }
 };
 
 # define NUM_ALGOS (sizeof(g_algorithms) / sizeof(t_algo))

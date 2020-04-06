@@ -1,7 +1,7 @@
 #ifndef _FT_SHA512_H_
 # define _FT_SHA512_H_
 
-uint64_t				g_sha5_k[80] = {
+static const uint64_t	g_sha5_k[80] = {
 	0x428a2f98d728ae22, 0x7137449123ef65cd, 0xb5c0fbcfec4d3b2f,
 	0xe9b5dba58189dbbc, 0x3956c25bf348b538, 0x59f111f1b605d019,
 	0x923f82a4af194f9b, 0xab1c5ed5da6d8118, 0xd807aa98a3030242,
