@@ -23,9 +23,9 @@ void				build_digest_msg_md5(t_input *arg, t_context ctx,
 	}
 }
 
-char				*append_padding_md5sha2(char *input, uint64_t input_len)
+char				*append_padding_md5sha2(char *input, uint128_t input_len)
 {
-	const uint64_t	padded_len = LEN_ALIGN(input_len); // TODO: get rid of this
+	const uint128_t	padded_len = LEN_ALIGN(input_len); // TODO: get rid of this
 	char			*padded;
 
 	if (!(padded = ft_memalloc(padded_len)))
@@ -38,10 +38,10 @@ char				*append_padding_md5sha2(char *input, uint64_t input_len)
 	return (padded);
 }
 
-char				*add_64bit_len_md5sha2(char *input, uint64_t append_len,
-											uint64_t padded_len)
+char				*add_64bit_len_md5sha2(char *input, uint128_t append_len,
+											uint128_t padded_len)
 {
-	uint64_t		pos;
+	uint128_t		pos;
 
 	pos = padded_len - 8;
 	while (pos < padded_len) {

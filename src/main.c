@@ -71,6 +71,17 @@ uint64_t			swap_uint64(uint64_t val)
 	return (val << 32) | (val >> 32);
 }
 
+uint128_t			swap_uint128(uint128_t val)
+{
+	val = ((val << 8) & (uint128_t)0xFF00FF00FF00FF00)
+		| ((val >> 8) & (uint128_t)0x00FF00FF00FF00FF);
+	val = ((val << 16) & (uint128_t)0xFFFF0000FFFF0000)
+		| ((val >> 16) & (uint128_t)0x0000FFFF0000FFFF);
+	val = ((val << 32) & (uint128_t)0xFFFFFFFF00000000)
+		| ((val >> 32) & (uint128_t)0x00000000FFFFFFFF);
+	return (val << 64) | (val >> 64);
+}
+
 void				swap_words(uint64_t *words, int wsize, int n)
 {
 	int i;
@@ -102,18 +113,22 @@ char				*bytes_to_ascii(uint64_t bytes, size_t size)
 }
 
 void				digest_final_chunk(t_global *g, char *buf, size_t read_len,
-										uint64_t append_len)
+										uint128_t append_len)
 {
-	const uint64_t	aligned_len = LEN_ALIGN(read_len);
+	uint128_t		aligned_len;
 	t_algo			alg;
 	unsigned		i;
 
 	alg = g->algo;
+	aligned_len = (alg.type < SHA512) ? LEN_ALIGN(read_len) :
+										LEN_ALIGN_128(read_len);
 	buf = alg.append_padding(buf, read_len);
 	if (alg.type == MD5)
-		buf = alg.add_64bit_len(buf, (append_len << 3), aligned_len);
+		buf = alg.append_length(buf, (append_len << 3), aligned_len);
+	else if (alg.type < SHA512)
+		buf = alg.append_length(buf, swap_uint64(append_len << 3), aligned_len);
 	else
-		buf = alg.add_64bit_len(buf, swap_uint64(append_len << 3), aligned_len);
+		buf = alg.append_length(buf, swap_uint128(append_len << 3), aligned_len);
 	i = 0;
 	while (i < ((unsigned)aligned_len / alg.chunk_len))
 	{
@@ -123,7 +138,7 @@ void				digest_final_chunk(t_global *g, char *buf, size_t read_len,
 	ft_strdel(&buf);
 }
 
-void				read_stdin(t_input *i, size_t rd, char *chunk, uint64_t *l)
+void				read_stdin(t_input *i, size_t rd, char *chunk, uint128_t *l)
 {
 	char			*tmp;
 
@@ -143,7 +158,7 @@ void				digest_stdin(t_global *g, t_input *arg)
 	char			chunk[chunk_len + 1];
 	ssize_t			ret;
 	size_t			rd;
-	uint64_t		length;
+	uint128_t		length;
 
 	length = 0;
 	ft_bzero(chunk, sizeof(chunk));
@@ -172,7 +187,7 @@ void				digest_fd(t_global *g, int fd, t_input *arg)
 {
 	const size_t	chunk_len = (size_t)g->algo.chunk_len;
 	char			chunk[chunk_len + 1];
-	uint64_t		length;
+	uint128_t		length;
 	ssize_t			ret;
 
 	ft_bzero(chunk, sizeof(chunk));
