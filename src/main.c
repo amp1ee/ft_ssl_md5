@@ -35,6 +35,8 @@ void				print_hash_default(char *algo_name, t_input *arg)
 
 void				print_digest(t_global *g, t_input *arg)
 {
+	if (arg->type == ERR)
+		return ;
 	if (arg->type == P_STDIN)
 		print_hash_stdin(arg);
 	else if (arg->type == S_STRING || arg->type == F_FILE)
@@ -68,6 +70,7 @@ void				print_file_err(t_global *g, t_input *i)
 	add_quotes ? ft_putchar('\'') : 0;
 	ft_putstr(": ");
 	ft_putendl(strerror(errno));
+	i->type = ERR;
 }
 
 
@@ -218,7 +221,10 @@ void				digest_fd(t_global *g, int fd, t_input *arg)
 		ft_bzero(chunk, chunk_len);
 	}
 	if (ret < 0)
-		return ; // TODO: Handle error
+	{
+		print_file_err(g, arg);
+		return ;
+	}
 	digest_final_chunk(g, chunk, ret, length + ret);
 	g->algo.build_digest_msg(arg, g->algo.ctx, g->algo.digest_len, chunk_len);
 }
@@ -239,7 +245,7 @@ void				digest_files(t_global *g)
 			{
 				print_file_err(g, i);
 				arg = arg->next;
-				continue ;	// TODO: handle error;
+				continue ;
 			}
 			digest_fd(g, fd, i);
 			close(fd);
