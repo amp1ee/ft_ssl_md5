@@ -64,7 +64,7 @@ void				print_file_err(t_global *g, t_input *i)
 	ft_putstr(": ");
 	ft_putstr(g->algo.name);
 	ft_putstr(": ");
-	add_quotes = (ft_strlen(i->str) == 0 || ft_strchr(i->str, ' '));
+	add_quotes = (i->str_len == 0 || ft_strchr(i->str, ' '));
 	add_quotes ? ft_putchar('\'') : 0;
 	ft_putstr(i->str);
 	add_quotes ? ft_putchar('\'') : 0;

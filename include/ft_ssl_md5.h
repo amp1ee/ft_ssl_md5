@@ -9,7 +9,7 @@
 # include <stdint.h>
 # include "libft.h"
 
-# define LEN_ALIGN(x)		(((((((x + 9) << 3) + 511) & ~511)) >> 3))
+# define LEN_ALIGN(x)		((((((((x) +  9) << 3) +  511) &  ~511)) >> 3))
 # define LEN_ALIGN_128(x)	((((((((x) + 17) << 3) + 1023) & ~1023)) >> 3))
 # define LEFT_ROTATE(x, c)	(((x) << (c)) | ((x) >> (32-(c))))
 # define RIGHT_ROTATE(x, c)	(((x) >> (c)) | ((x) << (32-(c))))
