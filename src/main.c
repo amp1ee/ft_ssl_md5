@@ -54,6 +54,23 @@ void				print_digest(t_global *g, t_input *arg)
 		: printf("ft_ssl: %s: %s\n", ssl->algo.str, arg->str);*/
 }
 
+void				print_file_err(t_global *g, t_input *i)
+{
+	int				add_quotes;
+
+	ft_putstr(g->self_name);
+	ft_putstr(": ");
+	ft_putstr(g->algo.name);
+	ft_putstr(": ");
+	add_quotes = (ft_strlen(i->str) == 0 || ft_strchr(i->str, ' '));
+	add_quotes ? ft_putchar('\'') : 0;
+	ft_putstr(i->str);
+	add_quotes ? ft_putchar('\'') : 0;
+	ft_putstr(": ");
+	ft_putendl(strerror(errno));
+}
+
+
 uint32_t			swap_uint32(uint32_t val)
 {
 	val = ((val << 8) & 0xFF00FF00)
@@ -220,13 +237,7 @@ void				digest_files(t_global *g)
 		{
 			if ((fd = open((i->str), O_RDONLY)) <= 0)
 			{
-				ft_putstr(g->self_name);
-				ft_putstr(": ");
-				ft_putstr(g->algo.name);
-				ft_putstr(": ");
-				ft_putstr(i->str);
-				ft_putstr(": ");
-				ft_putendl(strerror(errno));
+				print_file_err(g, i);
 				arg = arg->next;
 				continue ;	// TODO: handle error;
 			}
