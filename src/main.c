@@ -70,9 +70,9 @@ void				print_file_err(t_global *g, t_input *i)
 	add_quotes ? ft_putchar('\'') : 0;
 	ft_putstr(": ");
 	ft_putendl(strerror(errno));
+	i->digest = NULL;
 	i->type = ERR;
 }
-
 
 uint32_t			swap_uint32(uint32_t val)
 {
@@ -364,6 +364,22 @@ void				set_self_name(t_global *g, char *argv0)
 		g->self_name = argv0;
 }
 
+void				args_cleanup(void *arg, size_t argsize)
+{
+	t_input			*in;
+
+	in = (t_input *)arg;
+	if (in->digest != NULL)
+		ft_strdel(&(in->digest));
+	ft_bzero(arg, argsize);
+}
+
+void				global_cleanup(t_global *g)
+{
+	ft_lstdel(&(g->inputs), args_cleanup);
+	ft_strdel(&(g->name));
+}
+
 int					main(int argc, char *argv[])
 {
 	t_global	g;
@@ -381,5 +397,6 @@ int					main(int argc, char *argv[])
 		parse_options(&g);
 		proceed_digest(&g);
 	}
+	global_cleanup(&g);
 	return (0);
 }
