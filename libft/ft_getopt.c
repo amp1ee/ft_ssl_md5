@@ -7,79 +7,69 @@
 typedef struct	s_getopt
 {
 	int		ind;		// index into parent argv param
-	int		err;		// if error should be printed
 	int		opt;		// character checked for validity
 	char	*arg;		// argument associated with option
 	char	*oli;		// option letter list index
+	char	*place;
 }				t_getopt;
 
-int				ft_getopt(int argc, char **argv, const char *optstr, int *ind)
+static int			ft_getopt_error(int opt, char *mesg)
 {
-	static t_getopt	opt = {1, 1, 0, NULL, NULL};
-	static char		*place = END;
-	char			*p;
+	ft_putchar(opt);
+	ft_putstr(" -- ");
+	ft_putendl(mesg);
+	return (BADCH);
+}
 
-	if (!*place)
+static int			ft_getopt_resume(t_getopt *opt, int argc, char **argv,
+									int *ind)
+{
+	if (*++(opt->oli) != ':') // if the option doesn't need a value
 	{
-		if (opt.ind >= argc || *(place = argv[opt.ind]) != '-')
-		{
-			place = END;
-			return (EOF);
-		}
-		if (place[1] && *++place == '-')
-		{
-			++optind;
-			place = END;
-			return (EOF);
-		}
-	}
-	if ((opt.opt = (int)*place++) == (int)':' ||
-		!(opt.oli = ft_strchr(optstr, opt.opt)))
-	{
-		if (opt.opt == (int)'-')
-			return (EOF);
-		if (!*place)
-			++(opt.ind);
-		if (opt.err)
-		{
-			if (!(p = ft_strrchr(*argv, '/')))
-				p = *argv;
-			else
-				++p;
-			ft_putchar(opt.opt);
-			ft_putendl(" -- illegal option");
-		}
-		return (BADCH);
-	}
-	if (*++(opt.oli) != ':')
-	{
-		opt.arg = NULL;
-		if (!*place)
-			++(opt.ind);
+		opt->arg = NULL;
+		if (!*opt->place)
+			++(opt->ind);
 	}
 	else
 	{
-		if (*place)
-			opt.arg = place;
-		else if (argc <= ++(opt.ind))
+		if (*opt->place) // no whitespace
+			opt->arg = opt->place;
+		else if (argc <= ++(opt->ind)) // no arg given
 		{
-			place = END;
-			if (!(p = ft_strrchr(*argv, '/')))
-				p = *argv;
-			else
-				++p;
-			if (opt.err)
-			{
-				ft_putchar(opt.opt);
-				ft_putendl(" -- option requires an argument");
-			}
-			return (BADCH);
+			opt->place = END;
+			return (ft_getopt_error(opt->opt, "option requires an argument"));
 		}
 		else
-			opt.arg = argv[opt.ind];
-		place = END;
-		++(opt.ind);
+			opt->arg = argv[opt->ind];
+		opt->place = END;
+		++(opt->ind);
 	}
-	*ind = opt.ind;
-	return (opt.opt);
+	*ind = opt->ind;
+	return (opt->opt);
+}
+
+int					ft_getopt(int argc, char **argv, const char *optstr,
+								int *ind)
+{
+	static t_getopt	opt = {1, 0, NULL, NULL, END};
+
+	if (!*opt.place) // we're either at the end or the start of arg string (?)
+	{
+		if (opt.ind >= argc || *(opt.place = argv[opt.ind]) != '-' ||			// end of args || cur arg isn't an option (place := cur arg)
+			(opt.place[1] && *++opt.place == '-'))								// stumbled upon an arg that starts with '--'
+		{
+			opt.place = END;
+			return (EOF);
+		}
+	}
+	if ((opt.opt = (int)*opt.place++) == ':' ||
+		!(opt.oli = ft_strchr(optstr, opt.opt))) // (if we're given '-:' as arg) || No such letter in optstring
+	{
+		if (opt.opt == (int)'-')
+			return (EOF);
+		if (!*opt.place) // reached end of option arg
+			++(opt.ind);
+		return (ft_getopt_error(opt.opt, "illegal option"));
+	}
+	return (ft_getopt_resume(&opt, argc, argv, ind));
 }
