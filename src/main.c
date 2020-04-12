@@ -4,6 +4,7 @@
 void				print_usage(void)
 {
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
+	exit(1);
 }
 
 void				print_hash_stdin(t_input *arg)
@@ -285,9 +286,9 @@ void				save_input(t_global *g, int optind, t_argtype atype)
 
 	arg.type = atype;
 	//printf("%d\n", optind);
-	if (atype != F_FILE && optind > 1 && !(ft_strncmp(g->argv[optind], "-s", 2))
-									&& !(ft_strequ(g->argv[optind - 1], "-s")))
-		g->argv[optind] = &(g->argv[optind][2]);
+	if (atype != F_FILE && optind > 1 && (ft_strchr(g->argv[optind], 's'))
+									&& g->argv[optind][0] == '-')
+		g->argv[optind] = (ft_strchr(g->argv[optind], 's') + 1);
 	arg.str = (optind > 0) ? g->argv[optind] : "";
 	arg.str_len = (optind > 0) ? ft_strlen(g->argv[optind]) : 0;
 	if (!(new = ft_lstnew((void *)&arg, sizeof(t_input))))
@@ -317,7 +318,6 @@ void				parse_options(t_global *g)
 		else
 			print_usage();
 	}
-//	printf("OPTIND:%d, argc-1: %d\n", optind, g->argc - 1);
 	if ((optind < g->argc - 1 && optind != 0) || optind++ == 0)
 	{
 		while (++optind < g->argc)
@@ -382,7 +382,7 @@ void				global_cleanup(t_global *g)
 
 int					main(int argc, char *argv[])
 {
-	t_global	g;
+	t_global		g;
 
 	set_self_name(&g, argv[0]);
 	if (argc == 1) //	./ft_ssl w/o command
