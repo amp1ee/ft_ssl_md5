@@ -11,12 +11,15 @@ void				build_digest_msg_md5(t_input *arg, t_context ctx,
 	size_t			out_len;
 
 	ctx_buf = ctx.md5;
-	arg->digest = ft_strnew(digest_len);
+	if (!(arg->digest = ft_strnew(digest_len)))
+		exit_nomem(NULL);
 	out_len = (digest_len << 3) / chunk_len;
 	j = 0;
 	while (j < out_len)
 	{
 		tmp = bytes_to_ascii(ctx_buf[j], sizeof(uint32_t));
+		if (!tmp)
+			exit_nomem(NULL);
 		ft_strncpy(arg->digest + (j << 3), tmp, sizeof(uint32_t) << 1);
 		ft_strdel(&tmp);
 		j++;
@@ -55,14 +58,10 @@ char				*add_64bit_len_md5sha2(char *input, uint128_t append_len,
 
 void				init_md5_context(t_context *ctx)
 {
-	const uint32_t	a0 = 0x67452301;
-	const uint32_t	b0 = 0xefcdab89;
-	const uint32_t	c0 = 0x98badcfe;
-	const uint32_t	d0 = 0x10325476;
-	ctx->md5[0] = a0;
-	ctx->md5[1] = b0;
-	ctx->md5[2] = c0;
-	ctx->md5[3] = d0;
+	ctx->md5[0] = 0x67452301;
+	ctx->md5[1] = 0xefcdab89;
+	ctx->md5[2] = 0x98badcfe;
+	ctx->md5[3] = 0x10325476;
 }
 
 //	TODO: define A = 0, B = 1, C = 2, D = 3 for ctx_b[A]/[B]/[C]/[D]

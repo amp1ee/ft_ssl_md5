@@ -1,6 +1,14 @@
 #include "ft_ssl_md5.h"
 #include <stdio.h>
 
+void				exit_nomem(t_global *g)
+{
+	ft_putstr((g) ? g->name : "ft_ssl");
+	ft_putstr(": ");
+	ft_putendl("Memory allocation error");
+	exit(2);
+}
+
 void				print_usage(void)
 {
 	ft_putendl("usage: ft_ssl command [command opts] [command args]");
@@ -144,6 +152,8 @@ void				digest_final_chunk(t_global *g, char *buf, size_t read_len,
 	aligned_len = (alg.type < SHA512) ? LEN_ALIGN(read_len) :
 										LEN_ALIGN_128(read_len);
 	buf = alg.append_padding(buf, read_len);
+	if (!buf)
+		exit_nomem(g);
 	if (alg.type == MD5)
 		buf = alg.append_length(buf, (append_len << 3), aligned_len);
 	else if (alg.type < SHA512)
@@ -167,7 +177,8 @@ void				read_stdin(t_input *i, size_t rd, char *chunk, uint128_t *l)
 	if (i->type == P_STDIN)
 	{
 		tmp = ft_strjoin(i->str, chunk);
-		//ft_strdel(&(i->str));
+		if (!tmp)
+			exit_nomem(NULL);
 		i->str = tmp;
 	}
 	*l += rd;
@@ -267,6 +278,8 @@ void				identify_type(t_global *g)
 		{
 			g->algo = g_algorithms[i];
 			g->name = ft_upperstr(g_algorithms[i].name);
+			if (g->name == NULL)
+				exit_nomem(g);
 			break ;
 		}
 		i++;
@@ -274,7 +287,9 @@ void				identify_type(t_global *g)
 	if (i == NUM_ALGOS)
 	{
 		g->algo.type = NO_TYPE;
-		ft_putendl("Invalid command");		// TODO: echo the command
+		ft_putstr("Invalid command: '");
+		ft_putstr(g->argv[1]);
+		ft_putendl("'");
 		print_usage();
 	}
 }
@@ -285,14 +300,13 @@ void				save_input(t_global *g, int optind, t_argtype atype)
 	t_input			arg;
 
 	arg.type = atype;
-	//printf("%d\n", optind);
 	if (atype != F_FILE && optind > 1 && (ft_strchr(g->argv[optind], 's'))
 									&& g->argv[optind][0] == '-')
 		g->argv[optind] = (ft_strchr(g->argv[optind], 's') + 1);
 	arg.str = (optind > 0) ? g->argv[optind] : "";
 	arg.str_len = (optind > 0) ? ft_strlen(g->argv[optind]) : 0;
 	if (!(new = ft_lstnew((void *)&arg, sizeof(t_input))))
-		return ;					// TODO: malloc error handling
+		exit_nomem(g);
 	ft_lstadd(&(g->inputs), new);
 }
 

@@ -100,12 +100,15 @@ void				build_digest_msg_sha5(t_input *arg, t_context ctx,
 	size_t			out_len;
 
 	ctx_buf = ctx.sha5;
-	arg->digest = ft_strnew(digest_len);
+	if (!(arg->digest = ft_strnew(digest_len)))
+		exit_nomem(NULL);
 	out_len = (digest_len << 3) / chunk_len;
 	j = 0;
 	while (j < out_len)
 	{
 		tmp = bytes_to_ascii(swap_uint64(ctx_buf[j]), sizeof(uint64_t));
+		if (!tmp)
+			exit_nomem(NULL);
 		ft_strncpy(arg->digest + (j << 4), tmp, sizeof(uint64_t) << 1);
 		ft_strdel(&tmp);
 		j++;

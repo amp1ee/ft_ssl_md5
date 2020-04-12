@@ -86,6 +86,8 @@ typedef struct			s_global
 	t_list				*inputs;
 }						t_global;
 
+void					exit_nomem(t_global *g);
+
 char					*append_padding_md5sha2(char *buf, uint128_t buf_len);
 char					*append_padding_sha5(char *buf, uint128_t buf_len);
 

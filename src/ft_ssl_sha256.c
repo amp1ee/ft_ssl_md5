@@ -70,12 +70,15 @@ void				build_digest_msg_sha2(t_input *arg, t_context ctx,
 	size_t			out_len;
 
 	ctx_buf = ctx.sha2;
-	arg->digest = ft_strnew(digest_len);
+	if (!(arg->digest = ft_strnew(digest_len)))
+		exit_nomem(NULL);
 	out_len = (digest_len << 3) / chunk_len;
 	j = 0;
 	while (j < out_len)
 	{
 		tmp = bytes_to_ascii(swap_uint32(ctx_buf[j]), sizeof(uint32_t));
+		if (!tmp)
+			exit_nomem(NULL);
 		ft_strncpy(arg->digest + (j << 3), tmp, sizeof(uint32_t) << 1);
 		ft_strdel(&tmp);
 		j++;
