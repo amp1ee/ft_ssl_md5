@@ -3,14 +3,14 @@
 
 void				init_sha512_context(t_context *ctx)
 {
-	ctx->sha5[0] = 0x6a09e667f3bcc908;
-	ctx->sha5[1] = 0xbb67ae8584caa73b;
-	ctx->sha5[2] = 0x3c6ef372fe94f82b;
-	ctx->sha5[3] = 0xa54ff53a5f1d36f1;
-	ctx->sha5[4] = 0x510e527fade682d1;
-	ctx->sha5[5] = 0x9b05688c2b3e6c1f;
-	ctx->sha5[6] = 0x1f83d9abfb41bd6b;
-	ctx->sha5[7] = 0x5be0cd19137e2179;
+	ctx->sha5[A] = 0x6a09e667f3bcc908;
+	ctx->sha5[B] = 0xbb67ae8584caa73b;
+	ctx->sha5[C] = 0x3c6ef372fe94f82b;
+	ctx->sha5[D] = 0xa54ff53a5f1d36f1;
+	ctx->sha5[E] = 0x510e527fade682d1;
+	ctx->sha5[F] = 0x9b05688c2b3e6c1f;
+	ctx->sha5[G] = 0x1f83d9abfb41bd6b;
+	ctx->sha5[H] = 0x5be0cd19137e2179;
 }
 
 char				*append_padding_sha5(char *input, uint128_t input_len)
@@ -50,26 +50,26 @@ char				*add_128bit_len_sha5(char *input, uint128_t append_len,
 /* TODO */
 static void			compress_loop(uint64_t *h, uint64_t *sched, int j)
 {
-	uint64_t	tmp[6];
+	uint64_t		tmp[6];
 
 	// S0
-	tmp[0] = RIGHT_ROT_64(h[0], 28) ^ RIGHT_ROT_64(h[0], 34)
-				^ RIGHT_ROT_64(h[0], 39);
-	tmp[1] = (h[0] & h[1]) ^ (h[0] & h[2]) ^ (h[1] & h[2]);
+	tmp[A] = RIGHT_ROT_64(h[A], 28) ^ RIGHT_ROT_64(h[A], 34)
+				^ RIGHT_ROT_64(h[A], 39);
+	tmp[B] = (h[A] & h[B]) ^ (h[A] & h[C]) ^ (h[B] & h[C]);
 	// S1
-	tmp[2] = RIGHT_ROT_64(h[4], 14) ^ RIGHT_ROT_64(h[4], 18)
-				^ RIGHT_ROT_64(h[4], 41);
-	tmp[3] = (h[4] & h[5]) ^ ((~h[4]) & h[6]);
-	tmp[4] = h[7] + tmp[2] + tmp[3] + g_sha5_k[j] + sched[j];
-	tmp[5] = tmp[0] + tmp[1];
-	h[7] = h[6];
-	h[6] = h[5];
-	h[5] = h[4];
-	h[4] = h[3] + tmp[4];
-	h[3] = h[2];
-	h[2] = h[1];
-	h[1] = h[0];
-	h[0] = tmp[4] + tmp[5];
+	tmp[C] = RIGHT_ROT_64(h[E], 14) ^ RIGHT_ROT_64(h[E], 18)
+				^ RIGHT_ROT_64(h[E], 41);
+	tmp[D] = (h[E] & h[F]) ^ ((~h[E]) & h[G]);
+	tmp[E] = h[H] + tmp[C] + tmp[D] + g_sha5_k[j] + sched[j];
+	tmp[F] = tmp[A] + tmp[B];
+	h[H] = h[G];
+	h[G] = h[F];
+	h[F] = h[E];
+	h[E] = h[D] + tmp[E];
+	h[D] = h[C];
+	h[C] = h[B];
+	h[B] = h[A];
+	h[A] = tmp[E] + tmp[F];
 }
 
 /* TODO */

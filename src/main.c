@@ -399,7 +399,7 @@ int					main(int argc, char *argv[])
 	t_global		g;
 
 	set_self_name(&g, argv[0]);
-	if (argc == 1) 		// ft_ssl w/o command
+	if (argc == 1)		// ft_ssl w/o command
 		print_usage();	// digest_stdin(&g, NULL); //TODO OpenSSL behavior
 	else
 	{

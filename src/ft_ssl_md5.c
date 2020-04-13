@@ -58,55 +58,61 @@ char				*add_64bit_len_md5sha2(char *input, uint128_t append_len,
 
 void				init_md5_context(t_context *ctx)
 {
-	ctx->md5[0] = 0x67452301;
-	ctx->md5[1] = 0xefcdab89;
-	ctx->md5[2] = 0x98badcfe;
-	ctx->md5[3] = 0x10325476;
+	ctx->md5[A] = 0x67452301;
+	ctx->md5[B] = 0xefcdab89;
+	ctx->md5[C] = 0x98badcfe;
+	ctx->md5[D] = 0x10325476;
 }
 
-//	TODO: define A = 0, B = 1, C = 2, D = 3 for ctx_b[A]/[B]/[C]/[D]
+static void			do_hash_md5_round(uint32_t *ctx, size_t j,
+									uint32_t *f, uint32_t *g)
+{
+	if (j < 16)
+	{
+		*f = (ctx[B] & ctx[C]) | (~ctx[B] & ctx[D]);
+		*g = j;
+	}
+	else if (j < 32)
+	{
+		*f = (ctx[B] & ctx[D]) | (ctx[C] & ~ctx[D]);
+		*g = (5 * j + 1) % 16;
+	}
+	else if (j < 48)
+	{
+		*f = ctx[B] ^ ctx[C] ^ ctx[D];
+		*g = (3 * j + 5) % 16;
+	}
+	else
+	{
+		*f = ctx[C] ^ (ctx[B] | ~ctx[D]);
+		*g = (7 * j) % 16;
+	}
+}
+
 void				hash_md5(t_context *ctx, char *chunk)
 {
 	uint32_t		ctx_b[4];
-	uint32_t		F, g;	//TODO
+	uint32_t		f;
+	uint32_t		g;
 	size_t			j;
 
-	ctx_b[0] = ctx->md5[0];
-	ctx_b[1] = ctx->md5[1];
-	ctx_b[2] = ctx->md5[2];
-	ctx_b[3] = ctx->md5[3];
+	ctx_b[A] = ctx->md5[A];
+	ctx_b[B] = ctx->md5[B];
+	ctx_b[C] = ctx->md5[C];
+	ctx_b[D] = ctx->md5[D];
 	j = 0;
 	while (j < 64)
 	{
-		if (j < 16)
-		{
-			F = (ctx_b[1] & ctx_b[2]) | (~ctx_b[1] & ctx_b[3]);
-			g = j;
-		}
-		else if (j < 32)
-		{
-			F = (ctx_b[1] & ctx_b[3]) | (ctx_b[2] & ~ctx_b[3]);
-			g = (5*j + 1) % 16;
-		}
-		else if (j < 48)
-		{
-			F = ctx_b[1] ^ ctx_b[2] ^ ctx_b[3];
-			g = (3*j + 5) % 16;
-		}
-		else
-		{
-			F = ctx_b[2] ^ (ctx_b[1] | ~ctx_b[3]);
-			g = (7*j) % 16;
-		}
-		F = F + ctx_b[0] + g_md5_k[j] + ((uint32_t *)chunk)[g];
-		ctx_b[0] = ctx_b[3];
-		ctx_b[3] = ctx_b[2];
-		ctx_b[2] = ctx_b[1];
-		ctx_b[1] = ctx_b[1] + LEFT_ROTATE(F, g_s[j]);
+		do_hash_md5_round(ctx_b, j, &f, &g);
+		f = f + ctx_b[A] + g_md5_k[j] + ((uint32_t *)chunk)[g];
+		ctx_b[A] = ctx_b[D];
+		ctx_b[D] = ctx_b[C];
+		ctx_b[C] = ctx_b[B];
+		ctx_b[B] = ctx_b[B] + LEFT_ROTATE(f, g_s[j]);
 		j++;
 	}
-	ctx->md5[0] += ctx_b[0];
-	ctx->md5[1] += ctx_b[1];
-	ctx->md5[2] += ctx_b[2];
-	ctx->md5[3] += ctx_b[3];
+	ctx->md5[A] += ctx_b[A];
+	ctx->md5[B] += ctx_b[B];
+	ctx->md5[C] += ctx_b[C];
+	ctx->md5[D] += ctx_b[D];
 }

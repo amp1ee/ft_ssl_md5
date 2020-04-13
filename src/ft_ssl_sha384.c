@@ -3,12 +3,12 @@
 
 void				init_sha384_context(t_context *ctx)
 {
-	ctx->sha5[0] = 0xcbbb9d5dc1059ed8;
-	ctx->sha5[1] = 0x629a292a367cd507;
-	ctx->sha5[2] = 0x9159015a3070dd17;
-	ctx->sha5[3] = 0x152fecd8f70e5939;
-	ctx->sha5[4] = 0x67332667ffc00b31;
-	ctx->sha5[5] = 0x8eb44a8768581511;
-	ctx->sha5[6] = 0xdb0c2e0d64f98fa7;
-	ctx->sha5[7] = 0x47b5481dbefa4fa4;
+	ctx->sha5[A] = 0xcbbb9d5dc1059ed8;
+	ctx->sha5[B] = 0x629a292a367cd507;
+	ctx->sha5[C] = 0x9159015a3070dd17;
+	ctx->sha5[D] = 0x152fecd8f70e5939;
+	ctx->sha5[E] = 0x67332667ffc00b31;
+	ctx->sha5[F] = 0x8eb44a8768581511;
+	ctx->sha5[G] = 0xdb0c2e0d64f98fa7;
+	ctx->sha5[H] = 0x47b5481dbefa4fa4;
 }

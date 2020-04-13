@@ -5,14 +5,14 @@
 
 void				init_sha256_context(t_context *ctx)
 {
-	ctx->sha2[0] = 0x6A09E667;
-	ctx->sha2[1] = 0xBB67AE85;
-	ctx->sha2[2] = 0x3C6EF372;
-	ctx->sha2[3] = 0xA54FF53A;
-	ctx->sha2[4] = 0x510E527F;
-	ctx->sha2[5] = 0x9B05688C;
-	ctx->sha2[6] = 0x1F83D9AB;
-	ctx->sha2[7] = 0x5BE0CD19;
+	ctx->sha2[A] = 0x6A09E667;
+	ctx->sha2[B] = 0xBB67AE85;
+	ctx->sha2[C] = 0x3C6EF372;
+	ctx->sha2[D] = 0xA54FF53A;
+	ctx->sha2[E] = 0x510E527F;
+	ctx->sha2[F] = 0x9B05688C;
+	ctx->sha2[G] = 0x1F83D9AB;
+	ctx->sha2[H] = 0x5BE0CD19;
 }
 
 /*
@@ -43,22 +43,22 @@ static void		compress_loop(uint32_t *h, uint32_t *sched, int j)
 {
 	uint32_t	tmp[6];
 
-	tmp[0] = RIGHT_ROTATE(h[0], 2) ^ RIGHT_ROTATE(h[0], 13)
-				^ RIGHT_ROTATE(h[0], 22);
-	tmp[1] = (h[0] & h[1]) ^ (h[0] & h[2]) ^ (h[1] & h[2]);
-	tmp[2] = RIGHT_ROTATE(h[4], 6) ^ RIGHT_ROTATE(h[4], 11)
-				^ RIGHT_ROTATE(h[4], 25);
-	tmp[3] = (h[4] & h[5]) ^ ((~h[4]) & h[6]);
-	tmp[4] = h[7] + tmp[2] + tmp[3] + g_sha2_k[j] + sched[j];
-	tmp[5] = tmp[0] + tmp[1];
-	h[7] = h[6];
-	h[6] = h[5];
-	h[5] = h[4];
-	h[4] = h[3] + tmp[4];
-	h[3] = h[2];
-	h[2] = h[1];
-	h[1] = h[0];
-	h[0] = tmp[4] + tmp[5];
+	tmp[A] = RIGHT_ROTATE(h[A], 2) ^ RIGHT_ROTATE(h[A], 13)
+				^ RIGHT_ROTATE(h[A], 22);
+	tmp[B] = (h[A] & h[B]) ^ (h[A] & h[C]) ^ (h[B] & h[C]);
+	tmp[C] = RIGHT_ROTATE(h[E], 6) ^ RIGHT_ROTATE(h[E], 11)
+				^ RIGHT_ROTATE(h[E], 25);
+	tmp[D] = (h[E] & h[F]) ^ ((~h[E]) & h[G]);
+	tmp[E] = h[H] + tmp[C] + tmp[D] + g_sha2_k[j] + sched[j];
+	tmp[F] = tmp[A] + tmp[B];
+	h[H] = h[G];
+	h[G] = h[F];
+	h[F] = h[E];
+	h[E] = h[D] + tmp[E];
+	h[D] = h[C];
+	h[C] = h[B];
+	h[B] = h[A];
+	h[A] = tmp[E] + tmp[F];
 }
 
 void				build_digest_msg_sha2(t_input *arg, t_context ctx,

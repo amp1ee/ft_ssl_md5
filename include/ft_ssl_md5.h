@@ -15,6 +15,15 @@
 # define RIGHT_ROTATE(x, c)	(((x) >> (c)) | ((x) << (32-(c))))
 # define RIGHT_ROT_64(x, c)	(((x) >> (c)) | ((x) << (64-(c))))
 
+# define A		0
+# define B		1
+# define C		2
+# define D		3
+# define E		4
+# define F		5
+# define G		6
+# define H		7
+
 typedef unsigned __int128			uint128_t;
 
 typedef enum			e_options
