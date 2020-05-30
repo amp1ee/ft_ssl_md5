@@ -97,6 +97,19 @@ typedef struct			s_global
 
 void					exit_nomem(t_global *g);
 
+void					identify_type(t_global *g);
+void					save_input(t_global *g, int optind, t_argtype atype);
+void					parse_options(t_global *g);
+
+void					digest_final_chunk(t_global *g, char *buf,
+										size_t read_len, uint128_t append_len);
+void					read_stdin(t_input *i, size_t rd, char *chunk,
+										uint128_t *l);
+void					digest_stdin(t_global *g, t_input *arg);
+void					digest_fd(t_global *g, int fd, t_input *arg);
+void					digest_files(t_global *g);
+void					proceed_digest(t_global *g);
+
 char					*append_padding_md5sha2(char *buf, uint128_t buf_len);
 char					*append_padding_sha5(char *buf, uint128_t buf_len);
 
@@ -124,8 +137,16 @@ void					build_digest_msg_sha2(t_input *arg, t_context ctx,
 void					build_digest_msg_sha5(t_input *arg, t_context ctx,
 								unsigned digest_len, unsigned chunk_len);
 
+void					print_usage(void);
+void					print_hash_stdin(t_input *arg);
+void					print_hash_revfmt(t_input *arg);
+void					print_hash_default(char *algo_name, t_input *arg);
+void					print_digest(t_global *g, t_input *arg);
+void					print_file_err(t_global *g, t_input *i);
+
 uint32_t				swap_uint32(uint32_t val);
 uint64_t				swap_uint64(uint64_t val);
+uint128_t				swap_uint128(uint128_t val);
 void					swap_words(uint64_t *words, int wsize, int n);
 
 static const t_algo			g_algorithms[] = {

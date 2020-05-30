@@ -5,6 +5,10 @@ OBJDIR   = ./obj/
 INCDIR   = ./include/
 LIBFTDIR = ./libft/
 SRC = $(addprefix $(SRCDIR),	main.c			\
+								parser.c		\
+								digest.c		\
+								printers.c		\
+								swappers.c		\
 								ft_ssl_md5.c	\
 								ft_ssl_sha256.c	\
 								ft_ssl_sha224.c \

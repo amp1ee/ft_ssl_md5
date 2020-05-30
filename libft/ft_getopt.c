@@ -53,7 +53,7 @@ int					ft_getopt(int argc, char **argv, const char *optstr,
 {
 	static t_getopt	opt = {1, 0, NULL, NULL, END};
 
-	if (!*opt.place) // we're either at the end or the start of arg string (?)
+	if (!*opt.place) // we're either at the end or the start of arg string
 	{
 		if (opt.ind >= argc || *(opt.place = argv[opt.ind]) != '-' ||			// end of args || cur arg isn't an option (place := cur arg)
 			(opt.place[1] && *++opt.place == '-'))								// stumbled upon an arg that starts with '--'
