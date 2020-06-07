@@ -43,7 +43,7 @@ typedef enum			e_hash_types
 	SHA384
 }						t_hash_type;
 
-typedef struct			s_context
+typedef union			u_context
 {
 	uint64_t			sha5[8];
 	uint32_t			sha2[8];
